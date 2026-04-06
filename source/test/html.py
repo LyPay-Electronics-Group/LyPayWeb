@@ -1,13 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
-from aiofiles import open as a_open
-
+from fastapi.templating import Jinja2Templates
 
 router = APIRouter()
+templates = Jinja2Templates(directory="html")
 
 
-@router.get("/qq")
-async def QQ_skill_issue():
-    async with a_open("html/test.html", encoding="utf-8") as content:
-        return HTMLResponse(content=await content.read())
+@router.get("/qq", response_class=HTMLResponse)
+async def QQ_skill_issue(request: Request):
+    return templates.TemplateResponse(name="test.html", request=request)
