@@ -1,0 +1,4 @@
+FastAPI==0.128.0
+uvicorn==0.40.0
+aiofiles==25.1.0
+python-dotenv==1.2.1
