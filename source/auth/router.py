@@ -46,9 +46,7 @@ async def register_page(request: Request):
 @router.post("/register/send-code")
 async def register_send_code(request: Request, email: str = Form(...)):
     try:
-        code = "123"  # todo: сгенерить код
-        await send_verification_code(email, code)
-        request.session["registration_code"] = code  # todo: сделать безопасно
+        await send_verification_code(email)
         request.session["registration_email"] = email
         request.session["registration_code_sent"] = True
         request.session["registration_code_verified"] = False
@@ -74,11 +72,9 @@ async def register_verify(
         return RedirectResponse(url="/register", status_code=303)
 
     try:
-        ref_code = request.session["registration_code"]
-        if not await verify_code(email, code, ref_code):
+        if not await verify_code(email, code):
             raise ValueError("Неверный код.")
         user_id = await register_user(email, password, login)
-        request.session.pop("registration_code", None)
         request.session.pop("registration_email", None)
         request.session.pop("registration_code_sent", None)
         request.session.pop("registration_code_verified", None)
