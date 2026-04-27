@@ -28,7 +28,13 @@ async def profile_page(request: Request):
     except Exception as e:
         return HTMLResponse(content=f"Ошибка: {str(e)}", status_code=500)
     try:
-        avatar = await get_avatar(user_id)
+        api_answer = await get_avatar(user_id)
+        print('api answer:', api_answer)
+        if api_answer is not None:
+            avatar, updated = api_answer
+            print('avatar:', avatar)
+        else:
+            raise Exception
     except Exception as e:
         avatar = "/static/avatars/default.jpg"
     return templates.TemplateResponse("profile.html", {
