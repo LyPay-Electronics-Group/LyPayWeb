@@ -78,7 +78,7 @@ async def register_verify(
         request.session.pop("registration_email", None)
         request.session.pop("registration_code_sent", None)
         request.session.pop("registration_code_verified", None)
-        request.session["user"] = {"id": user_id, "email": email}
+        request.session["user"] = {"ID": user_id, "email": email}
         return RedirectResponse(url="/dashboard", status_code=303)
     except Exception as e:
         return templates.TemplateResponse("register.html", {
