@@ -12,7 +12,7 @@ templates = Jinja2Templates(directory="html")
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     if request.session.get("user"):
-        return RedirectResponse(url="/dashboard", status_code=303)
+        return RedirectResponse(url="/profile", status_code=303)
     return templates.TemplateResponse("login.html", {"request": request})
 
 
@@ -25,14 +25,14 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
             "error": "Неверный email или пароль."
         }, status_code=401)
     request.session["user"] = {"ID": user["ID"], "email": user["email"]}
-    return RedirectResponse(url="/dashboard", status_code=303)
+    return RedirectResponse(url="/profile", status_code=303)
 
 
 # --- Страница регистрации ---
 @router.get("/register", response_class=HTMLResponse)
 async def register_page(request: Request):
     if request.session.get("user"):
-        return RedirectResponse(url="/dashboard", status_code=303)
+        return RedirectResponse(url="/profile", status_code=303)
     code_sent = request.session.get("registration_code_sent", False)
     email = request.session.get("registration_email", "")
     return templates.TemplateResponse("register.html", {
@@ -63,9 +63,7 @@ async def register_send_code(request: Request, email: str = Form(...)):
 @router.post("/register/verify")
 async def register_verify(
         request: Request,
-        code: str = Form(...),
-        password: str = Form(...),
-        login: str = Form(...)
+        code: str = Form(...)
 ):
     email = request.session.get("registration_email")
     if not email:
@@ -74,12 +72,12 @@ async def register_verify(
     try:
         if not await verify_code(email, code):
             raise ValueError("Неверный код.")
-        user_id = await register_user(email, password, login)
+        user_id = await register_user(email, "123", email)
         request.session.pop("registration_email", None)
         request.session.pop("registration_code_sent", None)
         request.session.pop("registration_code_verified", None)
         request.session["user"] = {"ID": user_id, "email": email}
-        return RedirectResponse(url="/dashboard", status_code=303)
+        return RedirectResponse(url="/profile", status_code=303)
     except Exception as e:
         return templates.TemplateResponse("register.html", {
             "request": request,
@@ -92,14 +90,12 @@ async def register_verify(
 @router.post("/register")
 async def register(
         request: Request,
-        email: str = Form(...),
-        password: str = Form(...),
-        login: str = Form(...)
+        email: str = Form(...)
 ):
     try:
-        user_id = await register_user(email, password, login)
+        user_id = await register_user(email, "123", email)
         request.session["user"] = {"ID": user_id, "email": email}
-        return RedirectResponse(url="/dashboard", status_code=303)
+        return RedirectResponse(url="/profile", status_code=303)
     except Exception as e:
         return templates.TemplateResponse("register.html", {
             "request": request,
@@ -112,11 +108,3 @@ async def register(
 async def logout(request: Request):
     request.session.pop("user", None)
     return RedirectResponse(url="/login")
-
-
-@router.get("/dashboard")
-async def dashboard(request: Request):
-    user = request.session.get("user")
-    if not user:
-        return RedirectResponse(url="/login")
-    return HTMLResponse(f"<h1>Добро пожаловать, {user['email']}!</h1><a href='/logout'>Выйти</a>")

@@ -24,7 +24,6 @@ async def register_user(email: str, password: str, login: str):
     Возвращает ID созданного пользователя или выбрасывает исключение APIError.
     """
     user_info = await check_email_record(email)
-    print(user_info)
     user_id = await new(
         email=email,
         login=login,
