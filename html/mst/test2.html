@@ -22,20 +22,10 @@
 
     <div id="status" style="margin: 10px 0;"></div>
 
-    <div id="result-box" class="result">
-        <h3>Результаты</h3>
-        <p><strong>Всего запросов:</strong> <span id="total"></span></p>
-        <p><strong>Успешно:</strong> <span id="success"></span></p>
-        <p><strong>Потеряно:</strong> <span id="lost"></span></p>
-        <p><strong>Процент потерь:</strong> <span id="loss-percent"></span>%</p>
-        <p><strong>Среднее время сэмпла:</strong> <span id="avg-time"></span> мс</p>
-    </div>
-
     <script>
         const runBtn = document.getElementById('run-btn');
         const countInput = document.getElementById('count');
         const statusDiv = document.getElementById('status');
-        const resultBox = document.getElementById('result-box');
 
         runBtn.addEventListener('click', async () => {
             const count = parseInt(countInput.value, 10);
@@ -45,13 +35,11 @@
             }
 
             runBtn.disabled = true;
-            statusDiv.textContent = 'Выполняется тест...';
-            resultBox.classList.remove('active');
+
             try {
                 const formData = new FormData();
                 formData.append('count', count);
-
-                const response = await fetch('/mst/test2/run', {
+                const response = await fetch('/mst/test2/configure', {
                     method: 'POST',
                     body: formData
                 });
@@ -60,24 +48,75 @@
                     throw new Error(`Ошибка сервера: ${response.status}`);
                 }
 
-                const data = await response.json();
-                displayResults(data);
-                statusDiv.textContent = '';
+                const result = await response.json();
             } catch (error) {
-                statusDiv.innerHTML = `<span class="error">ошибка ${error.message}</span>`;
-            } finally {
                 runBtn.disabled = false;
+                return;
             }
-        });
 
-        function displayResults(data) {
-            document.getElementById('total').textContent = data.total;
-            document.getElementById('success').textContent = data.success;
-            document.getElementById('lost').textContent = data.lost;
-            document.getElementById('loss-percent').textContent = data.loss_percent;
-            document.getElementById('avg-time').textContent = data.avg_time_ms;
-            resultBox.classList.add('active');
-        }
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/mst/test2/run`;
+            const socket = new WebSocket(wsUrl);
+            socket.binaryType = 'arraybuffer';
+
+            let totalTests = 0;
+            let completedTests = 0;
+            let progressPercent = 0;
+
+            function updateProgress() {
+                if (totalTests > 0) {
+                    progressPercent = (completedTests / totalTests) * 100;
+                    statusDiv.textContent = `${progressPercent.toFixed(1)}% (${completedTests}/${totalTests})`;
+                }
+            }
+
+            socket.onopen = () => {
+                statusDiv.textContent = 'Соединение установлено, ожидание данных...';
+            };
+
+            socket.onmessage = async (event) => {
+                if (typeof event.data === 'string') {
+                    totalTests = parseInt(event.data, 10);
+                    if (isNaN(totalTests)) {
+                        socket.close();
+                        return;
+                    }
+                    completedTests = 0;
+                    updateProgress();
+                    return;
+                }
+
+                let arrayBuffer;
+                if (event.data instanceof ArrayBuffer) {
+                    arrayBuffer = event.data;
+                } else if (event.data instanceof Blob) {
+                    arrayBuffer = await event.data.arrayBuffer();
+                } else {
+                    return;
+                }
+
+                try {
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+                    const hashHex = Array.from(new Uint8Array(hashBuffer))
+                        .map(b => b.toString(16).padStart(2, '0'))
+                        .join('');
+
+                    socket.send(hashHex);
+
+                    completedTests++;
+                    updateProgress();
+                } catch (err) {}
+            };
+
+            socket.onclose = (event) => {
+                runBtn.disabled = false;
+            };
+
+            socket.onerror = () => {
+                runBtn.disabled = false;
+            };
+        });
     </script>
 </body>
 </html>

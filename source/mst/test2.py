@@ -1,10 +1,10 @@
-import time
-import asyncio
-from fastapi import APIRouter, Request, Form
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Request, Form, WebSocket
 from fastapi.templating import Jinja2Templates
 
+from scripts.unix import unix
+
 from LyPayAPI.mst.test2 import main
+from hashlib import sha256
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html/mst")
@@ -15,31 +15,33 @@ async def test2_page(request: Request):
     return templates.TemplateResponse("test2.html", {"request": request})
 
 
-@router.post("/test2/run")
-async def run_test2(count: int = Form(..., ge=1, le=5000)):
-    total_time = 0
-    lost = 0
+@router.post("/test2/configure")
+async def configure_test2(request: Request, count: int = Form(...)):
+    if request.session["mst"].get("test2") is None:
+        request.session["mst"]["test2"] = {
+            "count": count,
+            "time": 0,
+            "total": 0,
+            "success": 0
+        }
 
-    for _ in range(count):
-        start = time.perf_counter()
-        try:
-            data = await main()
-            elapsed = time.perf_counter() - start
-            if isinstance(data, bytes) and len(data) == 1024 * 1024:
-                total_time += elapsed
-            else:
-                lost += 1
-        except Exception as e:
-            lost += 1
-            print(e)
 
-    avg_time = total_time / (count - lost) if (count - lost) else 0.0
-    loss_percent = (lost / count) * 100 if count > 0 else 0.0
+@router.websocket("/test2/run")
+async def run_test2(websocket: WebSocket):
+    await websocket.accept()
 
-    return JSONResponse(content={
-        "total": count,
-        "success": count - lost,
-        "lost": lost,
-        "loss_percent": round(loss_percent, 2),
-        "avg_time_ms": round(avg_time * 1000, 3)
-    })
+    await websocket.send_text(str(websocket.session["mst"]["test2"]["count"]))
+    for _ in range(websocket.session["mst"]["test2"]["count"]):
+        data = await main()
+
+        start_time = unix()
+        await websocket.send_bytes(data)
+        client_hash = await websocket.receive_text()
+        end_time = unix()
+
+        websocket.session["mst"]["test2"]["time"] += end_time - start_time
+        websocket.session["mst"]["test2"]["total"] += 1
+        if client_hash == sha256(data).hexdigest():
+            websocket.session["mst"]["test2"]["success"] += 1
+
+    await websocket.close()
