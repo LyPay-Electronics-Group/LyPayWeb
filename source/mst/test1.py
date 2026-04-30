@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request
+from fastapi.responses import RedirectResponse
 
 from scripts.unix import unix
 
@@ -10,7 +11,7 @@ router = APIRouter()
 @router.get("/test1")
 async def do_test1(request: Request):
     if request.session.get("user") is None:
-        pass  # TODO: проверка регистрации
+        return RedirectResponse(url="/login", status_code=303)
 
 
     start_time = unix()

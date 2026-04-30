@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request
+from fastapi.responses import RedirectResponse
 
 from asyncio import sleep
 from random import randint
@@ -13,7 +14,7 @@ router = APIRouter()
 @router.get("/test3")
 async def do_test3(request: Request):
     if request.session.get("user") is None:
-        pass  # TODO: проверка регистрации
+        return RedirectResponse(url="/login", status_code=303)
     ID = request.session.get("user")["ID"]
 
     start_time = unix()
@@ -44,8 +45,7 @@ async def do_test3(request: Request):
 @router.get("/test3_end")
 async def end_test3(request: Request):
     if request.session.get("user") is None:
-        pass  # TODO: проверка регистрации
-
+        return RedirectResponse(url="/login", status_code=303)
 
     result_local, result_core = await test3_end(request.session.get("user")["ID"])
 
