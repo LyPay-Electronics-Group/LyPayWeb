@@ -26,6 +26,8 @@ async def configure_test2(request: Request, count: int = Form(...)):
             "total": 0,
             "success": 0
         }
+    else:
+        request.session["mst"]["test2"]["count"] = count
 
 
 @router.websocket("/test2/run")
