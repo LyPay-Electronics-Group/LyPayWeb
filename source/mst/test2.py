@@ -17,6 +17,8 @@ async def test2_page(request: Request):
 
 @router.post("/test2/configure")
 async def configure_test2(request: Request, count: int = Form(...)):
+    if request.session.get("mst") is None:
+        request.session["mst"] = dict()
     if request.session["mst"].get("test2") is None:
         request.session["mst"]["test2"] = {
             "count": count,
