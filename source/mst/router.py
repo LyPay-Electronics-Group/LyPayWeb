@@ -12,4 +12,4 @@ async def mst_main_page(request: Request):
     if request.session.get("user") is None:
         pass  # TODO: проверка регистрации
 
-    return templates.TemplateResponse("mst.html")
+    return templates.TemplateResponse("mst/index.html", {"request": request})
