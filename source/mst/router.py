@@ -27,9 +27,9 @@ async def do_test1(request: Request):
         request.session["mst"]["test1"] = {
             "total": 1,
             "success": int(test_result),
-            "time": start_time - end_time,
+            "time": end_time - start_time,
         }
     else:
         request.session["mst"]["test1"]["total"] += 1
         request.session["mst"]["test1"]["success"] += int(test_result)
-        request.session["mst"]["test1"]["time"] += start_time - end_time
+        request.session["mst"]["test1"]["time"] += end_time - start_time
