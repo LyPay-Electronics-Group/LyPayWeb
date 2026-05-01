@@ -22,13 +22,13 @@ async def register_user(email: str, password: str, login: str):
     Регистрирует нового пользователя через LyPayAPI.
     Возвращает ID созданного пользователя или выбрасывает исключение APIError.
     """
-    user_info = await check_email_record(email)
+    #user_info = await check_email_record(email)
     user_id = await new(
         email=email,
         login=login,
         password=password,
-        name=user_info["name"],
-        group=user_info["group"],
+        name="имя",
+        group="класс",
         owner_flag="web_owner"
     )
     return user_id
