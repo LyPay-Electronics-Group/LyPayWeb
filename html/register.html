@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация | LyPay</title>
 </head>
 <body>
@@ -11,13 +12,11 @@
     {% endif %}
 
     {% if not code_sent %}
-    <!-- Шаг 1: ввод email и отправка кода -->
     <form method="post" action="/register/send-code">
         <label>Email: <input type="email" name="email" required value="{{ email }}"></label><br>
         <button type="submit">Отправить код подтверждения</button>
     </form>
     {% else %}
-    <!-- Шаг 2: ввод кода и остальных данных -->
     <form method="post" action="/register/verify">
         <p>Код отправлен на <strong>{{ email }}</strong></p>
         <label>Код из письма: <input type="text" name="code" required></label><br>
