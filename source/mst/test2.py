@@ -56,8 +56,11 @@ async def run_test2(websocket: WebSocket):
         data = await main()
 
         start_time = unix()
+        print(1)
         await websocket.send_bytes(data)
+        print(2)
         client_hash = await websocket.receive_text()
+        print(3)
         end_time = unix()
 
         GLOBAL_TEST2_STORAGE[current_ID]["time"] += end_time - start_time
