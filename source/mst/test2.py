@@ -41,7 +41,9 @@ async def run_test2(websocket: WebSocket):
 
     current_count = websocket.session["mst"]["test2"]["count"]
     current_ID = websocket.session["user"]["ID"]
+    print(current_ID, current_count)
     await websocket.send_text(str(current_count))
+    print("send")
 
     if GLOBAL_TEST2_STORAGE.get(current_ID) is None:
         GLOBAL_TEST2_STORAGE[current_ID] = {
