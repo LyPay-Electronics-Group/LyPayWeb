@@ -1,0 +1,117 @@
+<!-- html/results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Данные сессии</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f5f5f5;
+        }
+
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        a, button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            background-color: #ffffff;
+            border: 2px solid #cfcfcf;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 0 1 auto;
+            min-width: 70px;
+            box-sizing: border-box;
+        }
+
+        a:hover, button:hover {
+            background-color: #f3f3f3;
+            border-color: #a0a0a0;
+            transform: translateY(-2px);
+        }
+
+        a:active, button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/mst">Назад</a>
+</div>
+<h1>Содержимое сессии</h1>
+<div id="sessionContent">
+    {% if session_data %}
+    <table>
+        <thead>
+        <tr>
+            <th>Ключ</th>
+            <th>Значение</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for key, value in session_data.items() %}
+        <tr>
+            <td><strong>{{ key }}</strong></td>
+            <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Сессия пуста.</p>
+    {% endif %}
+</div>
+<button id="clear-btn">Очистить результаты</button>
+<script>
+    document.getElementById('clear-btn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/mst/results/clear', {
+                method: 'POST'
+            });
+            if (!response.ok) {
+                throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+            }
+            const result = await response.json();
+            if (result.status === 'ok') {
+                document.getElementById('sessionContent').innerHTML = '<p>Сессия пуста.</p>';
+            } else {
+                alert('Не удалось очистить сессию:')
+            }
+        } catch (error) {
+            alert('Ошибка: ' + error.message);
+        }
+    });
+</script>
+</body>
+</html>
