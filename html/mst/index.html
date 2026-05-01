@@ -113,13 +113,16 @@
 
         .bottom-actions {
             position: absolute;
-            bottom: 30px;
+            bottom: 0;
+            left: 0;
             width: 100%;
             z-index: 10;
             display: flex;
             justify-content: center;
-            gap: 15px;
-            padding: 0 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 15px 20px calc(15px + env(safe-area-inset-bottom, 10px));
+            pointer-events: auto;
             box-sizing: border-box;
         }
 
