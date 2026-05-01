@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Machine Stats</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; display: flex; gap: 40px; }
+        .panel { flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 8px; }
+        h2 { margin-top: 0; }
+        .stat { margin-bottom: 8px; }
+        .label { font-weight: bold; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+<div class="panel" id="local-panel">
+    <h2>веб</h2>
+    <div id="local-stats">
+        <div class="stat"><span class="label">CPU:</span> <span id="local-cpu">0</span>%</div>
+        <div class="stat"><span class="label">RAM %:</span> <span id="local-ram_p">0</span>%</div>
+        <div class="stat"><span class="label">RAM объём:</span> <span id="local-ram_v">0</span> GB</div>
+        <div class="stat"><span class="label">CPU сборка:</span> <span id="local-cpu_build">0</span>%</div>
+        <div class="stat"><span class="label">RAM сборка %:</span> <span id="local-ram_build_p">0</span>%</div>
+        <div class="stat"><span class="label">RAM сборка объём:</span> <span id="local-ram_build_v">0</span> GB</div>
+        <div class="stat"><span class="label">Ядра CPU:</span> <span id="local-cpu_cores">0</span></div>
+        <div id="local-error" class="error"></div>
+    </div>
+</div>
+<div class="panel" id="core-panel">
+    <h2>ядро</h2>
+    <div id="core-stats">
+        <div class="stat"><span class="label">CPU:</span> <span id="core-cpu">0</span>%</div>
+        <div class="stat"><span class="label">RAM %:</span> <span id="core-ram_p">0</span>%</div>
+        <div class="stat"><span class="label">RAM объём:</span> <span id="core-ram_v">0</span> GB</div>
+        <div class="stat"><span class="label">CPU сборка:</span> <span id="core-cpu_build">0</span>%</div>
+        <div class="stat"><span class="label">RAM сборка %:</span> <span id="core-ram_build_p">0</span>%</div>
+        <div class="stat"><span class="label">RAM сборка объём:</span> <span id="core-ram_build_v">0</span> GB</div>
+        <div class="stat"><span class="label">Ядра CPU:</span> <span id="core-cpu_cores">0</span></div>
+        <div id="core-error" class="error"></div>
+    </div>
+</div>
+<script>
+    async function updateStats() {
+        try {
+            const localRes = await fetch('/mst/machine/local_stats');
+            if (!localRes.ok) throw new Error(`ошибка ${localRes.status}`);
+            const localData = await localRes.json();
+            document.getElementById('local-cpu').textContent = localData.cpu ?? '—';
+            document.getElementById('local-ram_p').textContent = localData.ram_p ?? '—';
+            document.getElementById('local-ram_v').textContent = (localData.ram_v ?? 0).toFixed(3);
+            document.getElementById('local-cpu_build').textContent = localData.cpu_build ?? '—';
+            document.getElementById('local-ram_build_p').textContent = localData.ram_build_p ?? '—';
+            document.getElementById('local-ram_build_v').textContent = (localData.ram_build_v ?? 0).toFixed(3);
+            document.getElementById('local-cpu_cores').textContent = (localData.cpu_cores ?? []).join(', ');
+            document.getElementById('local-error').textContent = '';
+        } catch (err) {
+            document.getElementById('local-error').textContent = 'ошибка ' + err.message;
+        }
+
+        try {
+            const coreRes = await fetch('/mst/machine/core_stats');
+            if (!coreRes.ok) throw new Error(`Ошибка ${coreRes.status}`);
+            const coreData = await coreRes.json();
+            document.getElementById('core-cpu').textContent = coreData.cpu ?? '—';
+            document.getElementById('core-ram_p').textContent = coreData.ram_p ?? '—';
+            document.getElementById('core-ram_v').textContent = (coreData.ram_v ?? 0).toFixed(3);
+            document.getElementById('core-cpu_build').textContent = coreData.cpu_build ?? '—';
+            document.getElementById('core-ram_build_p').textContent = coreData.ram_build_p ?? '—';
+            document.getElementById('core-ram_build_v').textContent = (coreData.ram_build_v ?? 0).toFixed(3);
+            document.getElementById('core-cpu_cores').textContent = (coreData.cpu_cores ?? []).join(', ');
+            document.getElementById('core-error').textContent = '';
+        } catch (err) {
+            document.getElementById('core-error').textContent = 'ошибка ' + err.message;
+        }
+    }
+
+    setInterval(updateStats, 5000);
+    updateStats();
+</script>
+</body>

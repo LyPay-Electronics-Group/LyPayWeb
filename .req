@@ -1,5 +1,5 @@
 FastAPI==0.128.0
-uvicorn==0.40.0
+uvicorn[standard]==0.40.0
 aiofiles==25.1.0
 python-dotenv==1.2.1
 httpx==0.28.1
@@ -8,3 +8,4 @@ PyJWT==2.9.0
 passlib[bcrypt]==1.7.4
 itsdangerous==2.2.0
 Jinja2==3.1.4
+colorama==0.4.6

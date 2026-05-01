@@ -1,0 +1,113 @@
+<!-- html/results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Данные сессии</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        a, button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            background-color: #ffffff;
+            border: 2px solid #cfcfcf;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 0 1 auto;
+            min-width: 70px;
+            box-sizing: border-box;
+        }
+
+        a:hover, button:hover {
+            background-color: #f3f3f3;
+            border-color: #a0a0a0;
+            transform: translateY(-2px);
+        }
+
+        a:active, button:active {
+            transform: scale(0.95);
+        }
+
+        .panel {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px;
+        }
+
+        h2 {
+            margin: 5px 0;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/mst">Назад</a>
+</div>
+<h1>Содержимое сессии</h1>
+<div id="sessionContent">
+    <div class="panel" id="test1">
+        <h2>тест 1</h2>
+        <div>
+            {% for key, value in test1.items() %}
+            <div class="stat"><span class="label">{{key}}:</span> <span>{{value}}</span></div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="panel" id="test2">
+        <h2>тест 2</h2>
+        <div>
+            {% for key, value in test2.items() %}
+            <div class="stat"><span class="label">{{key}}:</span> <span>{{value}}</span></div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="panel" id="test3">
+        <h2>тест 3</h2>
+        <div>
+            {% for key, value in test3.items() %}
+            <div class="stat"><span class="label">{{key}}:</span> <span>{{value}}</span></div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<button id="clear-btn">Очистить результаты</button>
+<script>
+    document.getElementById('clear-btn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/mst/results/clear', {
+                method: 'POST'
+            });
+            if (!response.ok) {
+                throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+            }
+            const result = await response.json();
+            if (result.status !== 'ok') {
+                alert('Не удалось очистить сессию')
+            } else {
+                window.location.reload();
+            }
+        } catch (error) {
+            alert('Ошибка: ' + error.message);
+        }
+    });
+</script>
+</body>
+</html>

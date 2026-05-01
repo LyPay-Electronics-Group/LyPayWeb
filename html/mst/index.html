@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>LyPay MST</title>
+    <style>
+        html {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            touch-action: manipulation;
+            -ms-touch-action: manipulation;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .main-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            max-height: 1000px;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+
+        .bg-stripes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: repeating-linear-gradient(
+                    115deg,
+                    transparent,
+                    transparent 60px,
+                    #f4f4f4 60px,
+                    #f4f4f4 90px,
+                    transparent 90px,
+                    transparent 100px,
+                    #f4f4f4 100px,
+                    #f4f4f4 110px,
+                    transparent 110px,
+                    transparent 120px,
+                    #f4f4f4 120px,
+                    #f4f4f4 130px
+            );
+        }
+
+        .dot-grid {
+            position: absolute;
+            bottom: 48%;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            z-index: 1;
+            background-image: radial-gradient(#cab0d2 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        .center-wrapper {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 200px;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .horizontal-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background-color: #cfcfcf;
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+
+        .diamond {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            transform: rotate(45deg);
+            border: 6px solid #cfcfcf;
+            background-color: #ffffff;
+            z-index: 1;
+        }
+
+        .text-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 5px 20px;
+        }
+
+        .text-content h2 {
+            margin: 0;
+            font-size: 50px;
+            font-weight: 400;
+            color: #000000;
+            letter-spacing: -1px;
+        }
+
+        .bottom-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 15px 20px calc(15px + env(safe-area-inset-bottom, 10px));
+            pointer-events: auto;
+            box-sizing: border-box;
+            margin-bottom: 50px;
+        }
+
+        .bottom-actions a {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            background-color: #ffffff;
+            border: 2px solid #cfcfcf;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 0 1 auto;
+            min-width: 70px;
+        }
+
+        .bottom-actions a:hover {
+            background-color: #f3f3f3;
+            border-color: #a0a0a0;
+            transform: translateY(-2px);
+        }
+
+        .bottom-actions a:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 500px) {
+            .bottom-actions {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .bottom-actions a {
+                flex: 1 1 40%;
+                max-width: 45%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="bg-stripes"></div>
+    <div class="dot-grid"></div>
+
+    <div class="center-wrapper">
+        <div class="horizontal-line"></div>
+        <div class="diamond"></div>
+        <div class="text-content">
+            <h2>LyPay</h2>
+            <h2>MST</h2>
+        </div>
+    </div>
+
+    <div class="bottom-actions">
+        <a href="/mst/test1">Тест 1</a>
+        <a href="/mst/test2">Тест 2</a>
+        <a href="/mst/test3">Тест 3</a>
+        <a href="/mst/results">Результаты</a>
+    </div>
+</div>
+
+</body>
+</html>

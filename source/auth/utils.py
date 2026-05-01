@@ -7,8 +7,7 @@ async def send_verification_code(email: str) -> None:
     """
     Проверяет, не занят ли email, и отправляет на него код подтверждения.
     """
-    await check_email_record(email)
-    await send_email(route="main", participant=email, code="123")
+    await send_email(route="main", participant=email)
 
 
 async def verify_code(email: str, code: str) -> bool:
@@ -23,14 +22,13 @@ async def register_user(email: str, password: str, login: str):
     Регистрирует нового пользователя через LyPayAPI.
     Возвращает ID созданного пользователя или выбрасывает исключение APIError.
     """
-    user_info = await check_email_record(email)
-    print(user_info)
+    #user_info = await check_email_record(email)
     user_id = await new(
         email=email,
         login=login,
         password=password,
-        name=user_info["name"],
-        group=user_info["group"],
+        name="имя",
+        group="класс",
         owner_flag="web_owner"
     )
     return user_id
