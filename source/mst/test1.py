@@ -17,7 +17,7 @@ async def test1_page(request: Request):
     return templates.TemplateResponse("test1.html", {"request": request})
 
 
-@router.get("/test1/run")
+@router.post("/test1/run")
 async def do_test1(request: Request):
     start_time = unix()
     test_result = await test1()
@@ -36,3 +36,4 @@ async def do_test1(request: Request):
         request.session["mst"]["test1"]["total"] += 1
         request.session["mst"]["test1"]["success"] += int(test_result)
         request.session["mst"]["test1"]["time"] += end_time - start_time
+    return {"status": "ok"}

@@ -58,12 +58,17 @@
     document.getElementById('run-btn').addEventListener('click', async () => {
         try {
             const response = await fetch('/mst/test1/run', {
-                method: 'GET'
+                method: 'POST'
             });
             if (!response.ok) {
                 throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
             }
+            const result = await response.json();
+            if (result.status !== 'ok') {
+                alert('Не удалось запустить тест 1')
+            }
         } catch (error) {
+            alert('Ошибка: ' + error.message);
         }
     });
 </script>
