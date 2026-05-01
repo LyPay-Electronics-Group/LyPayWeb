@@ -19,7 +19,10 @@
 
         label {
             font-weight: bold;
-            margin: 20px;
+        }
+
+        .hd {
+            margin: 10px
         }
 
         input[type="number"] {
@@ -74,12 +77,16 @@
     <a href="/mst">Назад</a>
 </div>
 <div class="form-group">
-    <label for="count">Количество запросов (1–500):</label><br>
+    <div class="hd">
+        <label for="count">Количество запросов (1–500):</label><br>
+    </div>
     <input type="number" id="count" value="10" min="1" max="500">
     <button id="run-btn">Запустить тест</button>
 </div>
 
 <div id="status" style="margin: 10px 0;"></div>
+
+<button id="finish-btn">Закончить</button>
 
 <script>
     const runBtn = document.getElementById('run-btn');
@@ -178,6 +185,24 @@
         socket.onerror = () => {
             runBtn.disabled = false;
         };
+    });
+    document.getElementById('finish-btn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/mst/test2/end', {
+                method: 'POST'
+            });
+            if (!response.ok) {
+                throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+            }
+            const result = await response.json();
+            if (result.status === 'ok') {
+                window.location.href = '/mst/results';
+            } else {
+                alert('Не удалось закончить тест 2')
+            }
+        } catch (error) {
+            alert('Ошибка: ' + error.message);
+        }
     });
 </script>
 </body>

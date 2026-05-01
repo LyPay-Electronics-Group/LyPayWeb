@@ -40,7 +40,7 @@ async def run_test2(websocket: WebSocket):
     await websocket.accept()
 
     current_count = websocket.session["mst"]["test2"]["count"]
-    current_ID = websocket.session["mst"]["test2"]["ID"]
+    current_ID = websocket.session["user"]["ID"]
     await websocket.send_text(str(current_count))
 
     if GLOBAL_TEST2_STORAGE.get(current_ID) is None:
@@ -49,7 +49,7 @@ async def run_test2(websocket: WebSocket):
             "total": 0,
             "success": 0
         }
-
+    print(GLOBAL_TEST2_STORAGE)
     for _ in range(websocket.session["mst"]["test2"]["count"]):
         data = await main()
 
@@ -63,6 +63,7 @@ async def run_test2(websocket: WebSocket):
         if client_hash == sha256(data).hexdigest():
             GLOBAL_TEST2_STORAGE[current_ID]["success"] += 1
 
+    print(GLOBAL_TEST2_STORAGE)
     await websocket.close()
 
 
@@ -72,5 +73,5 @@ async def end_test2(request: Request):
         return RedirectResponse(url="/login", status_code=303)
 
     if request.session.get("mst") is not None and request.session.get("mst").get("test2") is not None:
-        request.session["mst"]["test3"] = GLOBAL_TEST2_STORAGE[request.session["user"]["ID"]]
+        request.session["mst"]["test2"] = GLOBAL_TEST2_STORAGE[request.session["user"]["ID"]]
     return {"status": "ok"}
