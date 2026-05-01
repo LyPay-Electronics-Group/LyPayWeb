@@ -10,6 +10,8 @@ from hashlib import sha256
 router = APIRouter()
 templates = Jinja2Templates(directory="html/mst")
 
+GLOBAL_TEST2_STORAGE = dict()
+
 
 @router.get("/test2")
 async def test2_page(request: Request):
@@ -37,7 +39,17 @@ async def configure_test2(request: Request, count: int = Form(...)):
 async def run_test2(websocket: WebSocket):
     await websocket.accept()
 
-    await websocket.send_text(str(websocket.session["mst"]["test2"]["count"]))
+    current_count = websocket.session["mst"]["test2"]["count"]
+    current_ID = websocket.session["mst"]["test2"]["ID"]
+    await websocket.send_text(str(current_count))
+
+    if GLOBAL_TEST2_STORAGE.get(current_ID) is None:
+        GLOBAL_TEST2_STORAGE[current_ID] = {
+            "time": 0,
+            "total": 0,
+            "success": 0
+        }
+
     for _ in range(websocket.session["mst"]["test2"]["count"]):
         data = await main()
 
@@ -46,9 +58,19 @@ async def run_test2(websocket: WebSocket):
         client_hash = await websocket.receive_text()
         end_time = unix()
 
-        websocket.session["mst"]["test2"]["time"] += end_time - start_time
-        websocket.session["mst"]["test2"]["total"] += 1
+        GLOBAL_TEST2_STORAGE[current_ID]["time"] += end_time - start_time
+        GLOBAL_TEST2_STORAGE[current_ID]["total"] += 1
         if client_hash == sha256(data).hexdigest():
-            websocket.session["mst"]["test2"]["success"] += 1
+            GLOBAL_TEST2_STORAGE[current_ID]["success"] += 1
 
     await websocket.close()
+
+
+@router.post("/test2/end")
+async def end_test2(request: Request):
+    if request.session.get("user") is None:
+        return RedirectResponse(url="/login", status_code=303)
+
+    if request.session.get("mst") is not None and request.session.get("mst").get("test2") is not None:
+        request.session["mst"]["test3"] = GLOBAL_TEST2_STORAGE[request.session["user"]["ID"]]
+    return {"status": "ok"}

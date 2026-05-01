@@ -7,7 +7,6 @@ async def send_verification_code(email: str) -> None:
     """
     Проверяет, не занят ли email, и отправляет на него код подтверждения.
     """
-    await check_email_record(email)
     await send_email(route="main", participant=email, code="123")
 
 
