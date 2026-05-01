@@ -54,9 +54,16 @@
 <div class="group">
     <button id="run-btn">Жми</button>
     <button id="finish-btn">Закончить</button>
+    <div id="click-count" style="margin-top: 12px; font-weight: 600;">
+        Нажатий: 0
+    </div>
 </div>
 <script>
+    let count = 0;
     document.getElementById('run-btn').addEventListener('click', async () => {
+        count++;
+        document.getElementById('click-count').textContent = `Нажатий: ${count}`;
+
         try {
             const response = await fetch('/mst/test3/run', {
                 method: 'POST'
