@@ -41,9 +41,7 @@ async def run_test2(websocket: WebSocket):
 
     current_count = websocket.session["mst"]["test2"]["count"]
     current_ID = websocket.session["user"]["ID"]
-    print(current_ID, current_count)
     await websocket.send_text(str(current_count))
-    print("send")
 
     if GLOBAL_TEST2_STORAGE.get(current_ID) is None:
         GLOBAL_TEST2_STORAGE[current_ID] = {
@@ -51,16 +49,12 @@ async def run_test2(websocket: WebSocket):
             "total": 0,
             "success": 0
         }
-    print(GLOBAL_TEST2_STORAGE)
     for _ in range(websocket.session["mst"]["test2"]["count"]):
         data = await main()
 
         start_time = unix()
-        print(1)
         await websocket.send_bytes(data)
-        print(2)
         client_hash = await websocket.receive_text()
-        print(3)
         end_time = unix()
 
         GLOBAL_TEST2_STORAGE[current_ID]["time"] += end_time - start_time
@@ -68,7 +62,6 @@ async def run_test2(websocket: WebSocket):
         if client_hash == sha256(data).hexdigest():
             GLOBAL_TEST2_STORAGE[current_ID]["success"] += 1
 
-    print(GLOBAL_TEST2_STORAGE)
     await websocket.close()
 
 
