@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Form, WebSocket
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
 
 from scripts.unix import unix
 
@@ -12,6 +13,8 @@ templates = Jinja2Templates(directory="html/mst")
 
 @router.get("/test2")
 async def test2_page(request: Request):
+    if request.session.get("user") is None:
+        return RedirectResponse(url="/login", status_code=303)
     return templates.TemplateResponse("test2.html", {"request": request})
 
 
