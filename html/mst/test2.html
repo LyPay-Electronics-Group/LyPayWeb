@@ -121,7 +121,7 @@
         }
 
 
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const protocol = 'ws:';
         const wsUrl = `${protocol}//${window.location.host}/mst/test2/run`;
         console.log(wsUrl)
         const socket = new WebSocket(wsUrl);
