@@ -20,14 +20,29 @@ async def session_results(request: Request):
         return RedirectResponse(url="/login", status_code=303)
     if request.session.get("mst") is not None and request.session.get("mst").get("test1") is not None:
         test1 = dict(request.session["mst"]["test1"])
+        try:
+            test1["avg_time"] = round(test1["time"] / test1["total"], 3)
+            test1.pop("time")
+        except ZeroDivisionError:
+            test1 = dict()
     else:
         test1 = dict()
     if request.session.get("mst") is not None and request.session.get("mst").get("test2") is not None:
         test2 = dict(request.session["mst"]["test2"])
+        try:
+            test2["avg_time"] = round(test2["time"] / test2["total"], 3)
+            test2.pop("time")
+        except ZeroDivisionError:
+            test2 = dict()
     else:
         test2 = dict()
     if request.session.get("mst") is not None and request.session.get("mst").get("test3") is not None:
         test3 = dict(request.session["mst"]["test3"])
+        try:
+            test3["avg_time"] = round(test3["time"] / test3["total"], 3)
+            test3.pop("time")
+        except ZeroDivisionError:
+            test3 = dict()
     else:
         test3 = dict()
     return templates.TemplateResponse("results.html", {
