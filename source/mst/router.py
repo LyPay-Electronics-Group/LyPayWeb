@@ -18,13 +18,23 @@ async def mst_main_page(request: Request):
 async def session_results(request: Request):
     if request.session.get("user") is None:
         return RedirectResponse(url="/login", status_code=303)
-    if request.session.get("mst") is not None:
-        session_data = dict(request.session["mst"])
+    if request.session.get("mst") is not None and request.session.get("mst").get("test1") is not None:
+        test1 = dict(request.session["mst"]["test1"])
     else:
-        session_data = dict()
+        test1 = dict()
+    if request.session.get("mst") is not None and request.session.get("mst").get("test2") is not None:
+        test2 = dict(request.session["mst"]["test2"])
+    else:
+        test2 = dict()
+    if request.session.get("mst") is not None and request.session.get("mst").get("test3") is not None:
+        test3 = dict(request.session["mst"]["test3"])
+    else:
+        test3 = dict()
     return templates.TemplateResponse("results.html", {
         "request": request,
-        "session_data": session_data
+        "test1": test1,
+        "test2": test2,
+        "test3": test3,
     })
 
 
