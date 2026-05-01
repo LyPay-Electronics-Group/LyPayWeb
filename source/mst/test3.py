@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
 
 from asyncio import sleep
 from random import randint
@@ -9,9 +10,17 @@ from scripts.unix import unix
 from .utils import test3, test3_end, GLOBAL_TEST3_PARAMETER
 
 router = APIRouter()
+templates = Jinja2Templates(directory="html/mst")
 
 
 @router.get("/test3")
+async def test3_page(request: Request):
+    if request.session.get("user") is None:
+        return RedirectResponse(url="/login", status_code=303)
+    return templates.TemplateResponse("test3.html", {"request": request})
+
+
+@router.post("/test3/run")
 async def do_test3(request: Request):
     if request.session.get("user") is None:
         return RedirectResponse(url="/login", status_code=303)
@@ -40,9 +49,10 @@ async def do_test3(request: Request):
     else:
         request.session["mst"]["test3"]["total"] += GLOBAL_TEST3_PARAMETER
         request.session["mst"]["test3"]["time"] += end_time - start_time - delta_time
+    return {"status": "ok"}
 
 
-@router.get("/test3_end")
+@router.post("/test3/end")
 async def end_test3(request: Request):
     if request.session.get("user") is None:
         return RedirectResponse(url="/login", status_code=303)
@@ -52,3 +62,4 @@ async def end_test3(request: Request):
     if request.session.get("mst") is not None and request.session.get("mst").get("test3") is not None:
         request.session["mst"]["test3"]["local"] = result_local
         request.session["mst"]["test3"]["core"] = result_core
+    return {"status": "ok"}

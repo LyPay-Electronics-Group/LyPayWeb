@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MST Test 3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 10px;
+            padding: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .group {
+            margin: 20px;
+        }
+
+        a, button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            background-color: #ffffff;
+            border: 2px solid #cfcfcf;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 0 1 auto;
+            min-width: 70px;
+            box-sizing: border-box;
+        }
+
+        a:hover, button:hover {
+            background-color: #f3f3f3;
+            border-color: #a0a0a0;
+            transform: translateY(-2px);
+        }
+
+        a:active, button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/mst">Назад</a>
+</div>
+<div class="group">
+    <button id="run-btn">Жми</button>
+    <button id="finish-btn">Закончить</button>
+</div>
+<script>
+    document.getElementById('run-btn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/mst/test3/run', {
+                method: 'POST'
+            });
+            if (!response.ok) {
+                throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+            }
+            const result = await response.json();
+            if (result.status !== 'ok') {
+                alert('Не удалось запустить тест 3')
+            }
+        } catch (error) {
+            alert('Ошибка: ' + error.message);
+        }
+    });
+    document.getElementById('finish-btn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/mst/test3/end', {
+                method: 'POST'
+            });
+            if (!response.ok) {
+                throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+            }
+            const result = await response.json();
+            if (result.status === 'ok') {
+                window.location.href = '/mst/results';
+            } else {
+                alert('Не удалось закончить тест 3')
+            }
+        } catch (error) {
+            alert('Ошибка: ' + error.message);
+        }
+    });
+</script>
+</body>
+</html>
