@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MST Test 2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            margin: 10px;
+            padding: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .form-group {
+            margin: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        .hd {
+            margin: 10px
+        }
+
+        input[type="number"] {
+            width: 100px;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        a, button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            background-color: #ffffff;
+            border: 2px solid #cfcfcf;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 0 1 auto;
+            min-width: 70px;
+            box-sizing: border-box;
+        }
+
+        a:hover, button:hover {
+            background-color: #f3f3f3;
+            border-color: #a0a0a0;
+            transform: translateY(-2px);
+        }
+
+        a:active, button:active {
+            transform: scale(0.95);
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/mst">Назад</a>
+</div>
+<div class="form-group">
+    <div class="hd">
+        <label for="count">Количество запросов (1–500):</label><br>
+    </div>
+    <input type="number" id="count" value="10" min="1" max="500">
+    <button id="run-btn">Запустить тест</button>
+</div>
+
+<div id="status" style="margin: 10px 0;"></div>
+
+<button id="finish-btn">Закончить</button>
+
+<script>
+    const runBtn = document.getElementById('run-btn');
+    const countInput = document.getElementById('count');
+    const statusDiv = document.getElementById('status');
+
+    runBtn.addEventListener('click', async () => {
+        const count = parseInt(countInput.value, 10);
+        if (isNaN(count) || count < 1 || count > 500) {
+            alert('Введите число от 1 до 500');
+            return;
+        }
+
+        runBtn.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('count', count);
+            const response = await fetch('/mst/test2/configure', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка сервера: ${response.status}`);
+            }
+
+            const result = await response.json();
+        } catch (error) {
+            runBtn.disabled = false;
+            return;
+        }
+
+
+        const protocol = 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/mst/test2/run`;
+        console.log(wsUrl)
+        const socket = new WebSocket(wsUrl);
+        socket.binaryType = 'arraybuffer';
+
+        let totalTests = 0;
+        let completedTests = 0;
+        let progressPercent = 0;
+
+        function updateProgress() {
+            if (totalTests > 0) {
+                progressPercent = (completedTests / totalTests) * 100;
+                statusDiv.textContent = `${progressPercent.toFixed(1)}% (${completedTests}/${totalTests})`;
+            }
+        }
+
+        socket.onopen = () => {
+            statusDiv.textContent = 'Соединение установлено, ожидание данных...';
+        };
+
+        socket.onmessage = async (event) => {
+            if (typeof event.data === 'string') {
+                totalTests = parseInt(event.data, 10);
+                if (isNaN(totalTests)) {
+                    socket.close();
+                    return;
+                }
+                completedTests = 0;
+                updateProgress();
+                return;
+            }
+
+            let arrayBuffer;
+            if (event.data instanceof ArrayBuffer) {
+                arrayBuffer = event.data;
+            } else if (event.data instanceof Blob) {
+                arrayBuffer = await event.data.arrayBuffer();
+            } else {
+                return;
+            }
+
+            try {
+                const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+                const hashHex = Array.from(new Uint8Array(hashBuffer))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('');
+
+                socket.send(hashHex);
+
+                completedTests++;
+                updateProgress();
+            } catch (err) {
+                console.log(err)
+            }
+        };
+
+        socket.onclose = (event) => {
+            runBtn.disabled = false;
+        };
+
+        socket.onerror = () => {
+            runBtn.disabled = false;
+        };
+    });
+    document.getElementById('finish-btn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/mst/test2/end', {
+                method: 'POST'
+            });
+            if (!response.ok) {
+                throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+            }
+            const result = await response.json();
+            if (result.status !== 'ok') {
+                alert('Не удалось закончить тест 2')
+            }
+        } catch (error) {
+            alert('Ошибка: ' + error.message);
+        }
+    });
+</script>
+</body>
+</html>
