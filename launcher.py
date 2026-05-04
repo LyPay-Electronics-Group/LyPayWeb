@@ -9,7 +9,7 @@ if get_platform() == "Windows":
     system(
         f"uvicorn server:app "
         "--no-access-log "
-        f"--workers $NUMBER_OF_PROCESSORS "
+        f"--workers %NUMBER_OF_PROCESSORS% "
         f"--host {getenv('LYPAY_HOST')} "
         f"--port {getenv('LYPAY_PORT')}"
    )
