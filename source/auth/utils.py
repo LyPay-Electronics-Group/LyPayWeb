@@ -1,50 +1,71 @@
 from LyPayAPI.user.registration import check_email_record, send_email, new, check_code
 from LyPayAPI.user.info import get_by_email, get_by_login
-from LyPayAPI.__exceptions__ import APIError
+from LyPayAPI.__exceptions__ import APIError, EmailNotFound, IDAlreadyExists
 
 
-async def send_verification_code(email: str) -> None:
+async def send_verification_code(email: str) -> dict[str, ...]:
     """
-    Проверяет, не занят ли email, и отправляет на него код подтверждения.
+    Проверяет, что email ещё не зарегистрирован, и отправляет на него код подтверждения.
+    Возвращает corp_record.
     """
-    await check_email_record(email)
-    await send_email(route="main", participant=email, code="123")
+    corp_record = await check_email_record(email)
+
+    try:
+        existing_user = await get_by_email(email)
+    except EmailNotFound:
+        existing_user = None
+
+    if existing_user:
+        raise IDAlreadyExists
+
+    await send_email(route="main", participant=email)
+    return corp_record
 
 
 async def verify_code(email: str, code: str) -> bool:
     """
     Проверяет код подтверждения для указанного email.
     """
-    return await check_code(email, code)
+    try:
+        return await check_code(email, code)
+    except APIError:
+        return False
 
 
-async def register_user(email: str, password: str, login: str):
+async def register_user(
+        email: str,
+        password: str,
+        login: str,
+        name: str,
+        group: str
+):
     """
-    Регистрирует нового пользователя через LyPayAPI.
-    Возвращает ID созданного пользователя или выбрасывает исключение APIError.
+    Регистрирует нового пользователя через LyPayAPI и возвращает ID созданного пользователя.
     """
-    user_info = await check_email_record(email)
-    print(user_info)
     user_id = await new(
         email=email,
         login=login,
         password=password,
-        name=user_info["name"],
-        group=user_info["group"],
-        owner_flag="web_owner"
+        name=name,
+        group=group,
+        owner_flag="web_owner",
     )
     return user_id
 
 
-async def authenticate_user(email: str, password: str):
+async def authenticate_user(identifier: str, password: str):
     """
-    Проверяет учётные данные пользователя.
+    Проверяет учётные данные пользователя по email или логину.
+    Возвращает user_data или None.
     """
     try:
-        user_data = await get_by_email(email)
+        user_data = await get_by_email(identifier)
     except APIError:
-        user_data = await get_by_login(email)
-    print(user_data)
+        try:
+            user_data = await get_by_login(identifier)
+        except APIError:
+            return None
+
     if user_data and user_data.get("password") == password:
         return user_data
     return None
