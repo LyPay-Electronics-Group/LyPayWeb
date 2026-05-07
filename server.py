@@ -6,6 +6,7 @@ from starlette.responses import FileResponse
 from source.test import router as test_router
 from source.auth import router as auth_router
 from source.mst import router as mst_router
+from source.profile import router as profile_router
 
 from logging import getLogger, StreamHandler
 from sys import stdout
@@ -25,6 +26,7 @@ app.add_middleware(SessionMiddleware, secret_key="verysecretkey")  # todo:бра
 
 app.include_router(test_router)
 app.include_router(auth_router)
+app.include_router(profile_router)
 app.include_router(mst_router, prefix='/mst')
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
