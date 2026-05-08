@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>{{store.name}}</title></head>
+<body>
+    <h1>{{store.name}}</h1>
+    {% if store %}
+        <ul>
+        {% for key, value in store.items() %}
+                <strong>{{ key }}</strong> {{ value }}
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>У вас пока нет магазинов. <a href="/store/register">Зарегистрировать новый</a></p>
+    {% endif %}
+</body>
+</html>

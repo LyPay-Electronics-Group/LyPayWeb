@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><title>Регистрация магазина</title></head>
+<body>
+    <h1>Регистрация магазина</h1>
+    {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+    <form method="post">
+        <label>Пригласительный код: <input name="code" required></label>
+        <button type="submit">Проверить</button>
+    </form>
+</body>
+</html>

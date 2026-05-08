@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><title>Выбор ID магазина</title></head>
+<body>
+    <h1>Выберите ID магазина и укажите название</h1>
+    <form method="post">
+        <label>ID магазина:
+            <select name="store_id" required>
+                {% for id in variants %}
+                <option value="{{ id }}">{{ id }}</option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Название магазина: <input name="name" required></label><br>
+        <button type="submit">Создать магазин</button>
+    </form>
+    <p><a href="/store/register">Назад</a></p>
+</body>
+</html>
