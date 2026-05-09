@@ -31,7 +31,7 @@ async def check_store_code(
     if not is_valid:
         return templates.TemplateResponse(
             "store_register.html",
-            {"request": request, "error": "Неверный или просроченный код", "user": user_info}
+            {"request": request, "error": "Неверный код", "user": user_info}
         )
 
     request.session["store"] = {
