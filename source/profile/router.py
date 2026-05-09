@@ -1,9 +1,11 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends as D
 from fastapi import UploadFile, File
 from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
+
+from scripts.firewall_validator import firewall_validate_factory as FVF
 
 from LyPayAPI.user.info import get
 from LyPayAPI.user.settings.avatar import update as update_avatar, get as get_avatar
@@ -15,9 +17,14 @@ AVATAR_DIR = Path("media/users_media")
 AVATAR_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# --- Страница профиля ---
 @router.get("/profile", response_class=HTMLResponse)
-async def profile_page(request: Request):
+async def profile_page(
+        request: Request,
+        firewall_ok = D(FVF('main'))
+):
+    if not firewall_ok:
+        return RedirectResponse(url="/bad-firewall-status", status_code=303)
+
     user_info = request.session.get("user")
     if not user_info:
         return RedirectResponse(url="/login", status_code=303)
