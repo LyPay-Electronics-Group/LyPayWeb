@@ -2,23 +2,27 @@ from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from LyPayAPI.store.registration import check_link, get_ID, new, send_email
-from LyPayAPI.admin.info import db_query
+from LyPayAPI.store.info import get_all_shopkeepers
 
 router = APIRouter()
-templates = Jinja2Templates(directory="html/store")
+templates = Jinja2Templates(directory="html/store/register")
 
 
-@router.get("/register", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def register_store_page(request: Request):
-    user_info = request.session.get("user")
-    if not user_info:
+    user_info = request.session.get("user", None)
+    if user_info is None:
         return RedirectResponse(url="/login", status_code=303)
-    # todo: проверка есть ли у юзера магаз
-    await send_email("mandzhiev.ts@students.sch2.ru", "123")
+
+    if user_info["ID"] in await get_all_shopkeepers():
+        return RedirectResponse(url="/store", status_code=303)
+
+    await send_email("behtin.gm@students.sch2.ru")  # TEMP
+    request.session["store"] = {"registration": True}
     return templates.TemplateResponse("register.html", {"request": request})
 
 
-@router.post("/register")
+@router.post("/")
 async def check_store_code(
         request: Request,
         code: str = Form(...)
@@ -30,22 +34,20 @@ async def check_store_code(
 
     if not is_valid:
         return templates.TemplateResponse(
-            "store_register.html",
+            "register.html",
             {"request": request, "error": "Неверный код", "user": user_info}
         )
 
-    request.session["store"] = {
-        "host_id": user_info["ID"]
-    }
+    request.session["store"]["host_id"] = user_info["ID"]
 
     return RedirectResponse(url="/store/register/select-id", status_code=303)
 
 
-@router.get("/register/select-id", response_class=HTMLResponse)
+@router.get("/select-id", response_class=HTMLResponse)
 async def select_store_id_page(request: Request):
-    if "store" not in request.session:
+    if "store" not in request.session or not request.session["store"].get("registration", False):
         return RedirectResponse(url="/store/register", status_code=303)
-    # todo: проверка есть ли у юзера магаз
+
     variants = [await get_ID() for _ in range(10)]
 
     return templates.TemplateResponse(
@@ -54,15 +56,15 @@ async def select_store_id_page(request: Request):
     )
 
 
-@router.post("/register/select-id")
+@router.post("/select-id")
 async def create_store(
         request: Request,
         store_id: str = Form(...),
         name: str = Form(...)
 ):
-    reg_data = request.session.get("user")
-    if not reg_data:
-        return RedirectResponse(url="/store/register", status_code=303)
+    reg_data = request.session.get("user", None)
+    if reg_data is None:
+        return RedirectResponse(url="/login", status_code=303)
     request.session["store"]["ID"] = store_id
     request.session["store"]["name"] = name
 
@@ -74,15 +76,3 @@ async def create_store(
     )
 
     return RedirectResponse(url="/profile", status_code=303)
-
-
-@router.get("", response_class=HTMLResponse)
-async def my_stores(request: Request):
-    reg_data = request.session.get("store")  # todo: брать по id юзера
-    if not reg_data:
-        return RedirectResponse(url="/store/register", status_code=303)
-    print(reg_data)
-    return templates.TemplateResponse(
-        "store.html",
-        {"request": request, "store": reg_data}
-    )
