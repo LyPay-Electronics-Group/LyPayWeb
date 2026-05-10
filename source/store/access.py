@@ -4,8 +4,9 @@ from fastapi.templating import Jinja2Templates
 
 from scripts.firewall_validator import firewall_validate_factory as FVF
 
-from LyPayAPI.store.info import get, get_by_shopkeeper, get_all_shopkeepers
-from LyPayAPI.store.access import remove as access_remove
+from LyPayAPI.store.info import get, get_by_shopkeeper
+from LyPayAPI.store.access import remove as access_remove, get_list as access_list
+from LyPayAPI.__exceptions__ import IDNotFound
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html/store/access")
@@ -32,10 +33,7 @@ async def access_page(
         {
             "request": request,
             "store": await get(current_storeID),
-            "shopkeepers": [
-                sk for sk in await get_all_shopkeepers()
-                if await get_by_shopkeeper(sk) == current_storeID and sk != user_info["ID"]
-            ],
+            "shopkeepers": [sk for sk in await access_list(current_storeID) if sk != user_info["ID"]],
         }
     )
 
@@ -60,5 +58,8 @@ async def remove(
     if ID == user_info["ID"]:
         return JSONResponse({"error": True}, status_code=403)
 
-    await access_remove(current_storeID, ID)
-    return JSONResponse({"ok": True}, status_code=200)
+    try:
+        await access_remove(current_storeID, ID)
+        return JSONResponse({"ok": True}, status_code=200)
+    except IDNotFound:
+        return JSONResponse({"error": True}, status_code=403)
