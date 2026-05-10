@@ -34,12 +34,10 @@ btn_{{ id }}.addEventListener('click', async () => {
 {% endfor %}
 </script>
 <script>
-const ext_div = document.getElementById('container');
-const btn_plus = document.getElementById('plus');
-
+const container = document.getElementById('container');
 const plus_source = document.getElementById("plus-source");
 
-btn_plus.addEventListener('click', async () => {
+document.getElementById('plus').addEventListener('click', async () => {
     const id = plus_source.value;
     const response = await fetch(`/store/access/add?ID=${id}`, {
         method: 'GET',
