@@ -1,3 +1,4 @@
+from asyncio import run
 from fastapi import Request
 from LyPayAPI.utils.firewall import check
 
@@ -18,6 +19,6 @@ def firewall_validate_factory(route: str):
         if user_session is None:
             return False
 
-        return check(user_session.get("ID", 0), route)
+        return run(check(user_session.get("ID", 0), route))
 
     return firewall_filter
