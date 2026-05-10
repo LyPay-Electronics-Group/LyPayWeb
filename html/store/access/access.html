@@ -4,5 +4,28 @@
 <body>
     <h1>Настройки доступа</h1>
     {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+    <h3>{{ store.ID }}</h3>
+    <h4>{{ store.name }}</h4>
+    <br><br>
+    {% for id in shopkeepers %}
+    <div id="{{ id }} div">
+        <p>ID: <a href="/profile/{{ id }}">{{ id }}</a></p>
+        <button id="{{ id }}">[ remove ]</button><br>
+    </div>
+    {% endfor %}
 </body>
+<script>
+{% for id in shopkeepers %}
+const btn_{{ id }} = document.getElementById('{{ id }}');
+const div_{{ id }} = document.getElementById('{{ id }} div');
+btn_{{ id }}.addEventListener('click', async () => {
+    const response = await fetch('/store/access/remove?ID={{ id }}', {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'}
+    });
+    if ("error" in await response.json()) { btn_{{ id }}.disabled = true; }
+    else { div_{{ id }}.remove(); }
+});
+{% endfor %}
+</script>
 </html>
