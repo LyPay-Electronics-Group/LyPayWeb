@@ -5,8 +5,8 @@ from fastapi.templating import Jinja2Templates
 from scripts.firewall_validator import firewall_validate_factory as FVF
 
 from LyPayAPI.store.info import get, get_by_shopkeeper
-from LyPayAPI.store.access import remove as access_remove, get_list as access_list
-from LyPayAPI.__exceptions__ import IDNotFound
+from LyPayAPI.store import access
+from LyPayAPI.__exceptions__ import IDNotFound, UserIsAlreadyShopkeeper
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html/store/access")
@@ -33,7 +33,7 @@ async def access_page(
         {
             "request": request,
             "store": await get(current_storeID),
-            "shopkeepers": [sk for sk in await access_list(current_storeID) if sk != user_info["ID"]],
+            "shopkeepers": [sk for sk in await access.get_list(current_storeID) if sk != user_info["ID"]],
         }
     )
 
@@ -59,7 +59,34 @@ async def remove(
         return JSONResponse({"error": True}, status_code=403)
 
     try:
-        await access_remove(current_storeID, ID)
+        await access.remove(current_storeID, ID)
         return JSONResponse({"ok": True}, status_code=200)
     except IDNotFound:
+        return JSONResponse({"error": True}, status_code=403)
+
+
+@router.get("/add")
+async def add(
+        ID: int,
+        request: Request,
+        firewall_ok = D(FVF('stores'))
+):
+    if not firewall_ok:
+        return RedirectResponse("/", status_code=303)
+
+    user_info = request.session.get("user", None)
+    if user_info is None:
+        return RedirectResponse("/login", status_code=303)
+
+    current_storeID = await get_by_shopkeeper(user_info["ID"])
+    if (await get(current_storeID))["hostID"] != user_info["ID"]:
+        return RedirectResponse("/store", status_code=303)
+
+    if ID == user_info["ID"]:
+        return JSONResponse({"error": True}, status_code=403)
+
+    try:
+        await access.add(current_storeID, ID)
+        return JSONResponse({"ok": True}, status_code=200)
+    except IDNotFound, UserIsAlreadyShopkeeper:
         return JSONResponse({"error": True}, status_code=403)

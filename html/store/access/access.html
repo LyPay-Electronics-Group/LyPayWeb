@@ -7,17 +7,22 @@
     <h3>{{ store.ID }}</h3>
     <h4>{{ store.name }}</h4>
     <br><br>
-    {% for id in shopkeepers %}
-    <div id="{{ id }} div">
-        <p>ID: <a href="/profile/{{ id }}">{{ id }}</a></p>
-        <button id="{{ id }}">[ remove ]</button><br>
+    <div id="container">
+        {% for id in shopkeepers %}
+        <div id="{{ id }}-div">
+            <p>ID: <a href="/profile/{{ id }}">{{ id }}</a></p>
+            <button id="{{ id }}">[ remove ]</button><br>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+    <br><br><br><br>
+    <button id="plus">[ + ]</button>
+    <label for="plus-source">Введите ID пользователя для добавления: </label><input type="text" id="plus-source">
 </body>
 <script>
 {% for id in shopkeepers %}
 const btn_{{ id }} = document.getElementById('{{ id }}');
-const div_{{ id }} = document.getElementById('{{ id }} div');
+const div_{{ id }} = document.getElementById('{{ id }}-div');
 btn_{{ id }}.addEventListener('click', async () => {
     const response = await fetch('/store/access/remove?ID={{ id }}', {
         method: 'GET',
@@ -27,5 +32,43 @@ btn_{{ id }}.addEventListener('click', async () => {
     else { div_{{ id }}.remove(); }
 });
 {% endfor %}
+</script>
+<script>
+const ext_div = document.getElementById('container');
+const btn_plus = document.getElementById('plus');
+
+const plus_source = document.getElementById("plus-source");
+
+btn_plus.addEventListener('click', async () => {
+    const id = plus_source.value;
+    const response = await fetch(`/store/access/add?ID=${id}`, {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'}
+    });
+    if ("error" in await response.json()) { plus_source.value = ""; }
+    else {
+        const new_div = document.createElement('div');
+        new_div.id = `${id}-div`
+
+        const p = document.createElement('p');
+        p.innerHTML = `ID: <a href="/profile/${id}">${id}</a>`;
+        new_div.appendChild(p);
+
+        const b = document.createElement('button');
+        b.textContent = '[ remove ]';
+        b.id = id;
+        b.addEventListener('click', async () => {
+            const response = await fetch(`/store/access/remove?ID=${id}`, {
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'}
+            });
+            if ("error" in await response.json()) { b.disabled = true; }
+            else { new_div.remove(); }
+        });
+        new_div.appendChild(b);
+
+        container.appendChild(new_div);
+    }
+});
 </script>
 </html>
