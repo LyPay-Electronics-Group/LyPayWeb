@@ -13,7 +13,7 @@ from logging import getLogger, StreamHandler
 from sys import stdout
 from middleware.logger import CustomLog
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
 logger = getLogger("app.requests")
 logger.setLevel(20)  # level INFO
