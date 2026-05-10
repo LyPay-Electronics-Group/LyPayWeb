@@ -43,9 +43,8 @@ async def login_page(request: Request):
 
 
 @router.post("/login")
-async def login(request: Request, email: str = Form(...), password: str = Form(...)):
-    identifier = email.strip()
-    user = await authenticate_user(identifier, password)
+async def login(request: Request, identifier: str = Form(...), password: str = Form(...)):
+    user = await authenticate_user(identifier.strip(), password)
     if not user:
         return templates.TemplateResponse(
             "login.html",
@@ -119,7 +118,7 @@ async def register_verify(
 
         user_id = await register_user(email, password, login, name=name, group=group)
         _clear_registration_session(request)
-        request.session["user"] = {"ID": user_id, "email": email}
+        request.session["user"] = {"ID": user_id}
         return RedirectResponse(url="/profile", status_code=303)
     except Exception as e:
         return _registration_template(
@@ -137,4 +136,3 @@ async def register_verify(
 async def logout(request: Request):
     request.session.pop("user")
     return RedirectResponse(url="/login", status_code=303)
-
