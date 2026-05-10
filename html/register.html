@@ -20,7 +20,7 @@
     <form method="post" action="/register/verify">
         <p>Код отправлен на <strong>{{ email }}</strong></p>
         <label>Код из письма: <input type="text" name="code" required></label><br>
-        <label>Придумайте логин (разрешены символы A-Z, a-z, 0-9, нижнее подчёркивание: <input type="text" name="login" required></label><br>
+        <label>Придумайте логин (разрешены символы <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, нижнее подчёркивание, точка и дефис: <input type="text" name="login" required></label><br>
         <label>Придумайте надёжный пароль: <input type="text" name="password" required></label><br>
         <button type="submit">Зарегистрироваться</button>
     </form>
