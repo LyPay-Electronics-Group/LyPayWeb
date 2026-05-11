@@ -26,7 +26,7 @@ async def profile_page_redirect(
         return RedirectResponse(url="/bad-firewall-status", status_code=303)
 
     user_info = request.session.get("user")
-    if not user_info:
+    if user_info is None:
         return RedirectResponse(url="/login", status_code=303)
 
     return RedirectResponse(url=f"/profile/{user_info["ID"]}", status_code=303)
@@ -42,14 +42,16 @@ async def profile_page(
         return RedirectResponse(url="/bad-firewall-status", status_code=303)
 
     user_info = request.session.get("user")
-    if not user_info:
+    if user_info is None:
         return RedirectResponse(url="/login", status_code=303)
     user_id = user_info["ID"]
+
     try:
         user_info = await get(user_id)
         requested_profile = await get(ID)
     except Exception as e:
         return HTMLResponse(content=f"Ошибка: {str(e)}", status_code=500)
+
     clean_user_info = dict()
     try:
         clean_user_info["Имя"] = requested_profile["name"]
@@ -60,16 +62,17 @@ async def profile_page(
             clean_user_info["Баланс"] = user_info["balance"]
     except KeyError:
         clean_user_info = user_info
+
     try:
         api_answer = await get_avatar(ID)
         if api_answer is not None:
             avatar, updated = api_answer
+            avatar = '/' + avatar
         else:
             raise Exception
     except Exception as e:
         avatar = "/static/skill_issue.jpg"
-        print(e)
-    print(avatar)
+
     return templates.TemplateResponse("profile.html", {
         "request": request,
         "user": clean_user_info,
