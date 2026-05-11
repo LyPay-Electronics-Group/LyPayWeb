@@ -9,6 +9,7 @@ from scripts.firewall_validator import firewall_validate_factory as FVF
 
 from LyPayAPI.user.info import get
 from LyPayAPI.user.settings.avatar import update as update_avatar, get as get_avatar
+from LyPayAPI.__exceptions__ import IDNotFound
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html")
@@ -49,14 +50,17 @@ async def profile_page(
     try:
         user_info = await get(user_id)
         requested_profile = await get(ID)
+    except IDNotFound:
+        return RedirectResponse(url="/profile", status_code=303)
     except Exception as e:
         return HTMLResponse(content=f"Ошибка: {str(e)}", status_code=500)
 
     clean_user_info = dict()
     try:
-        clean_user_info["Имя"] = requested_profile["name"]
         clean_user_info["ID"] = requested_profile["ID"]
         clean_user_info["Логин"] = requested_profile["login"]
+        clean_user_info["Имя"] = requested_profile["name"]
+        clean_user_info["Группа"] = requested_profile["group"]
         clean_user_info["Почта"] = requested_profile["email"]
         if ID == user_id:
             clean_user_info["Баланс"] = user_info["balance"]
