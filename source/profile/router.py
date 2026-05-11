@@ -18,7 +18,23 @@ AVATAR_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.get("/profile", response_class=HTMLResponse)
+async def profile_page_redirect(
+        request: Request,
+        firewall_ok = D(FVF('main'))
+):
+    if not firewall_ok:
+        return RedirectResponse(url="/bad-firewall-status", status_code=303)
+
+    user_info = request.session.get("user")
+    if not user_info:
+        return RedirectResponse(url="/login", status_code=303)
+
+    return RedirectResponse(url=f"/profile/{user_info["ID"]}", status_code=303)
+
+
+@router.get("/profile/{ID}", response_class=HTMLResponse)
 async def profile_page(
+        ID: int,
         request: Request,
         firewall_ok = D(FVF('main'))
 ):
@@ -31,19 +47,21 @@ async def profile_page(
     user_id = user_info["ID"]
     try:
         user_info = await get(user_id)
+        requested_profile = await get(ID)
     except Exception as e:
         return HTMLResponse(content=f"Ошибка: {str(e)}", status_code=500)
     clean_user_info = dict()
     try:
-        clean_user_info["Имя"] = user_info["name"]
-        clean_user_info["ID"] = user_info["ID"]
-        clean_user_info["Логин"] = user_info["login"]
-        clean_user_info["Почта"] = user_info["email"]
-        clean_user_info["Баланс"] = user_info["balance"]
+        clean_user_info["Имя"] = requested_profile["name"]
+        clean_user_info["ID"] = requested_profile["ID"]
+        clean_user_info["Логин"] = requested_profile["login"]
+        clean_user_info["Почта"] = requested_profile["email"]
+        if ID == user_id:
+            clean_user_info["Баланс"] = user_info["balance"]
     except KeyError:
         clean_user_info = user_info
     try:
-        api_answer = await get_avatar(user_id)
+        api_answer = await get_avatar(ID)
         if api_answer is not None:
             avatar, updated = api_answer
         else:
@@ -55,7 +73,8 @@ async def profile_page(
     return templates.TemplateResponse("profile.html", {
         "request": request,
         "user": clean_user_info,
-        "avatar": avatar
+        "avatar": avatar,
+        "is_self": ID == user_id,
     })
 
 

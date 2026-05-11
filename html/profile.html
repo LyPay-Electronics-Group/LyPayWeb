@@ -28,10 +28,12 @@
             alt="Аватар"
             class="avatar"
         >
+        {% if is_self %}
         <form action="/profile/avatar" method="post" enctype="multipart/form-data" style="margin-top: 10px;">
             <input type="file" name="file" accept="image" required>
             <button type="submit">Обновить аватар</button>
         </form>
+        {% endif %}
     </div>
 
     {% if request.query_params.message %}
