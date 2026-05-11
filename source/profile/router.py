@@ -26,7 +26,7 @@ async def profile_page_redirect(
     if not firewall_ok:
         return RedirectResponse(url="/bad-firewall-status", status_code=303)
 
-    user_info = request.session.get("user")
+    user_info = request.session.get("user", None)
     if user_info is None:
         return RedirectResponse(url="/login", status_code=303)
 
@@ -42,7 +42,7 @@ async def profile_page(
     if not firewall_ok:
         return RedirectResponse(url="/bad-firewall-status", status_code=303)
 
-    user_info = request.session.get("user")
+    user_info = request.session.get("user", None)
     if user_info is None:
         return RedirectResponse(url="/login", status_code=303)
     user_id = user_info["ID"]
@@ -55,17 +55,15 @@ async def profile_page(
     except Exception as e:
         return HTMLResponse(content=f"Ошибка: {str(e)}", status_code=500)
 
-    clean_user_info = dict()
-    try:
-        clean_user_info["ID"] = requested_profile["ID"]
-        clean_user_info["Логин"] = requested_profile["login"]
-        clean_user_info["Имя"] = requested_profile["name"]
-        clean_user_info["Группа"] = requested_profile["group"]
-        clean_user_info["Почта"] = requested_profile["email"]
-        if ID == user_id:
-            clean_user_info["Баланс"] = user_info["balance"]
-    except KeyError:
-        clean_user_info = user_info
+    clean_user_info = {
+        "ID":     requested_profile["ID"],
+        "Логин":  requested_profile["login"],
+        "Имя":    requested_profile["name"],
+        "Группа": requested_profile["group"],
+        "Почта":  requested_profile["email"]
+    }
+    if ID == user_id:
+        clean_user_info["Баланс"] = user_info["balance"]
 
     try:
         api_answer = await get_avatar(ID)
@@ -90,7 +88,7 @@ async def upload_avatar(
         request: Request,
         file: UploadFile = File(...)
 ):
-    user_info = request.session.get("user")
+    user_info = request.session.get("user", None)
     if not user_info:
         return RedirectResponse(url="/login", status_code=303)
     if file.content_type[:5] != "image":
@@ -112,16 +110,9 @@ async def upload_avatar(
 
 @router.get("/media/users_media/{filename}")
 async def serve_avatar(filename: str, request: Request):
-    user = request.session.get("user")
-    if not user:
+    user = request.session.get("user", None)
+    if user is None:
         raise HTTPException(status_code=401, detail="Требуется авторизация")
-    try:
-        file_user_id = int(filename.rsplit(".", 1)[0])
-    except (ValueError, IndexError):
-        raise HTTPException(status_code=403, detail="Неверный формат файла")
-
-    if file_user_id != user["ID"]:
-        raise HTTPException(status_code=403, detail="Доступ запрещён")
 
     file_path = AVATAR_DIR / filename
     if not file_path.is_file():
