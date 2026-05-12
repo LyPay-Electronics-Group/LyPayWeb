@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head><title>Ассортимент</title></head>
+<style>
+    .item {
+        display: flex;
+        justify-content: space-between;
+        margin: 0;
+    }
+</style>
+<body>
+    <h1>Ассортимент</h1>
+    {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+    <h3>{{ store.ID }}</h3>
+    <h4>{{ store.name }}</h4>
+    <br><br>
+    <div id="container">
+        {% for item in items %}
+        <div id="{{ item.itemID }}-div">
+            <p class="item">
+                <span><input type="text" id="{{ item.itemID }}-name" value="{{ item.name }}" disabled /></span>
+                <span><input type="number" id="{{ item.itemID }}-price" value="{{ item.price }}" disabled /><p> Тгр.</p></span>
+            </p>
+            <button id="{{ item.itemID }}-edit">[ edit ]</button><br>
+            <button id="{{ item.itemID }}-remove">[ remove ]</button>
+        </div>
+        {% endfor %}
+    </div>
+    <br><br><br><br>
+    <button id="plus">[ + ]</button>
+    <label for="plus-source">test test test: </label><input type="text" id="plus-source">
+</body>
+<script>
+{% for item in items %}
+const edit_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-edit');
+const remove_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-remove');
+const name_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-name');
+const price_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-price');
+const div_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-div');
+remove_{{ item.itemID }}.addEventListener('click', () => { div_{{ item.itemID }}.remove(); });
+edit_{{ item.itemID }}.addEventListener('click', () => {
+    name_{{ item.itemID }}.disabled = false;
+    price_{{ item.itemID }}.disabled = false;
+});
+name_{{ item.itemID }}.addEventListener('blur', () => {
+    name_{{ item.itemID }}.disabled = true;
+});
+name_{{ item.itemID }}.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter')
+        name_{{ item.itemID }}.blur();
+});
+price_{{ item.itemID }}.addEventListener('blur', () => {
+    price_{{ item.itemID }}.disabled = true;
+});
+price_{{ item.itemID }}.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter')
+        price_{{ item.itemID }}.blur();
+});
+
+{% endfor %}
+</script>
+<script>
+
+</script>
+</html>
