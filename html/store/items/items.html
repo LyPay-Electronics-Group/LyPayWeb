@@ -18,11 +18,12 @@
         {% for item in items %}
         <div id="{{ item.itemID }}-div">
             <p class="item">
-                <span><input type="text" id="{{ item.itemID }}-name" value="{{ item.name }}" disabled /></span>
-                <span><input type="number" id="{{ item.itemID }}-price" value="{{ item.price }}" disabled /><p> Тгр.</p></span>
+                <span><input type="text" id="{{ item.itemID }}-name" value="{{ item.name }}" disabled autocomplete="off" /></span>
+                <span><input type="number" id="{{ item.itemID }}-price" value="{{ item.price }}" disabled autocomplete="off" /><p> Тгр.</p></span>
             </p>
-            <button id="{{ item.itemID }}-edit">[ edit ]</button><br>
-            <button id="{{ item.itemID }}-remove">[ remove ]</button>
+            <button id="{{ item.itemID }}-toggle">[ edit ]</button><br>
+            <button id="{{ item.itemID }}-remove">[ remove ]</button><br>
+            <p id="{{ item.itemID }}-msg"></p>
         </div>
         {% endfor %}
     </div>
@@ -32,16 +33,36 @@
 </body>
 <script>
 {% for item in items %}
-const edit_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-edit');
+const toggle_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-toggle');
 const remove_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-remove');
 const name_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-name');
 const price_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-price');
+const msg_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-msg');
 const div_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-div');
+let enable_flag_{{ item.itemID }} = false;
 remove_{{ item.itemID }}.addEventListener('click', () => { div_{{ item.itemID }}.remove(); });
-edit_{{ item.itemID }}.addEventListener('click', () => {
-    name_{{ item.itemID }}.disabled = false;
-    price_{{ item.itemID }}.disabled = false;
+toggle_{{ item.itemID }}.addEventListener('click', async () => {
+    enable_flag_{{ item.itemID }} = !enable_flag_{{ item.itemID }};
+    if (enable_flag_{{ item.itemID }}) {
+        name_{{ item.itemID }}.disabled = false;
+        price_{{ item.itemID }}.disabled = false;
+        toggle_{{ item.itemID }}.textContent = "[ save ]";
+    }
+    else {
+        name_{{ item.itemID }}.disabled = true;
+        price_{{ item.itemID }}.disabled = true;
+        const response = await fetch(`/store/items/single?ID={{ item.itemID }}&name=${name_{{ item.itemID }}.value}&price=${price_{{ item.itemID }}.value}`, {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (response.status >= 400) { toggle_{{ id }}.disabled = true; }
+        else {
+            toggle_{{ item.itemID }}.textContent = "[ edit ]";
+            msg_{{ item.itemID }}.textContent = "saved!";
+        }
+    }
 });
+/*
 name_{{ item.itemID }}.addEventListener('blur', () => {
     name_{{ item.itemID }}.disabled = true;
 });
@@ -56,6 +77,7 @@ price_{{ item.itemID }}.addEventListener('keydown', (e) => {
     if (e.key === 'Enter')
         price_{{ item.itemID }}.blur();
 });
+*/
 
 {% endfor %}
 </script>

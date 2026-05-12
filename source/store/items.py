@@ -36,6 +36,35 @@ async def items_page(
     )
 
 
+@router.get("/single")
+async def save_edit(
+        request: Request,
+        ID: str = None,
+        name: str = None,
+        price: int = None,
+        firewall_ok = D(FVF('stores'))
+):
+    if not firewall_ok:
+        return RedirectResponse("/", status_code=303)
+
+    if ID is None or name is None or price is None:
+        return JSONResponse({"error": True}, status_code=403)
+
+    user_info = request.session.get("user", None)
+    if user_info is None:
+        return RedirectResponse("/login", status_code=303)
+
+    current_storeID = await get_by_shopkeeper(user_info["ID"])
+    if (await items.get(ID))["storeID"] != current_storeID:
+        return JSONResponse({"error": True}, status_code=403)
+
+    try:
+        await items.edit(ID, name, price)
+        return JSONResponse({"ok": True}, status_code=200)
+    except IDNotFound, UserIsAlreadyShopkeeper:
+        return JSONResponse({"error": True}, status_code=403)
+
+
 @router.get("/add")
 async def add(
         ID: int,
