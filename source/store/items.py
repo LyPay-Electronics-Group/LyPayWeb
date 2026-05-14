@@ -8,8 +8,10 @@ from LyPayAPI.store.info import get, get_by_shopkeeper
 from LyPayAPI.store import items
 from LyPayAPI.__exceptions__ import IDNotFound, UserIsAlreadyShopkeeper
 
+from scripts.base_context import build_base_context
+
 router = APIRouter()
-templates = Jinja2Templates(directory="html/store/items")
+templates = Jinja2Templates(directory="html")
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -27,12 +29,15 @@ async def items_page(
     current_storeID = await get_by_shopkeeper(user_info["ID"])
 
     return templates.TemplateResponse(
-        "items.html",
-        {
-            "request": request,
-            "store": await get(current_storeID),
-            "items": [await items.get(item) for item in await items.get_all(current_storeID, active_filter=True)],
-        }
+        "store/items.html",
+        await build_base_context(
+            request,
+            active_tab="stores",
+            extra={
+                "store": await get(current_storeID),
+                "items": [await items.get(item) for item in await items.get_all(current_storeID, active_filter=True)],
+            },
+        ),
     )
 
 

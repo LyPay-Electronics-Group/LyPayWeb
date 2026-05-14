@@ -6,8 +6,10 @@ from LyPayAPI.store.info import get, get_by_shopkeeper
 
 from scripts.firewall_validator import firewall_validate_factory as FVF
 
+from scripts.base_context import build_base_context
+
 router = APIRouter()
-templates = Jinja2Templates(directory="html/store")
+templates = Jinja2Templates(directory="html")
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -23,6 +25,10 @@ async def index(
         return RedirectResponse("/login", status_code=303)
 
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "store": await get(await get_by_shopkeeper(user_info["ID"]))}
+        "store/index.html",
+        await build_base_context(
+            request,
+            active_tab="stores",
+            extra={"store": await get(await get_by_shopkeeper(user_info["ID"]))},
+        ),
     )

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#7bb8ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>{% block title %}LyPay{% endblock %}</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --header-a: #79b8ff;
+            --header-b: #8de7bd;
+            --primary: #2563eb;
+            --success: #059669;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --bg: #eef2f7;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --radius: 18px;
+            --nav-h: 84px;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Mobile-only frame */
+        .app {
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: var(--surface);
+            position: relative;
+        }
+
+        /* Header (макет) */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: calc(14px + var(--safe-top)) 14px 14px;
+            color: #0b1020;
+            background: linear-gradient(90deg, var(--header-a), var(--header-b));
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .brand {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 44px;
+            line-height: 1;
+            letter-spacing: -1px;
+            font-weight: 700;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .brand-link {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .balance-pill {
+            display: inline-flex;
+            align-items: center;
+            overflow: hidden;
+            border-radius: 14px;
+            background: rgba(37, 99, 235, 0.35);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-amount {
+            padding: 10px 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #0b1020;
+            min-width: 92px;
+            text-align: center;
+        }
+
+        .balance-add {
+            width: 38px;
+            height: 38px;
+            border: none;
+            background: rgba(37, 99, 235, 0.55);
+            color: #0b1020;
+            font-size: 26px;
+            line-height: 1;
+            display: grid;
+            place-items: center;
+        }
+
+        .avatar-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            border: none;
+            background: rgba(255, 255, 255, 0.55);
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+        }
+
+        .avatar-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Content */
+        .container {
+            padding: 16px 14px calc(var(--nav-h) + 16px + var(--safe-bottom));
+            min-height: calc(100vh - 84px);
+            background: var(--surface);
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 14px;
+            color: var(--text);
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ccc;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: transform 0.05s ease, filter 0.15s ease;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-2 {
+            margin-top: 8px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(15, 23, 42, 0.12);
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.06);
+            z-index: 100;
+            height: calc(var(--nav-h) + var(--safe-bottom));
+            padding-bottom: var(--safe-bottom);
+        }
+
+        .bottom-nav .nav-inner {
+            height: var(--nav-h);
+            max-width: 430px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            align-items: center;
+        }
+
+        .bottom-nav a {
+            color: #111827;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 8px 0;
+        }
+
+        .bottom-nav a.active {
+            color: #2563eb;
+        }
+
+        .nav-icon {
+            width: 30px;
+            height: 30px;
+            display: block;
+        }
+
+        @media (max-width: 380px) {
+            .container {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .app-header {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .brand {
+                font-size: 40px;
+            }
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+<div class="app">
+    {% block header %}
+    {% if not hide_header %}
+    <header class="app-header">
+        <div class="header-row">
+            <div class="brand">
+                <a class="brand-link" href="/" aria-label="На главную">{% block page_title %}LyPay{% endblock %}</a>
+            </div>
+            <div class="header-actions">
+                {% block balance %}
+                <a class="balance-pill" href="/balance/topup" aria-label="Перейти к пополнению баланса">
+                    <span class="balance-amount">{{ balance|default("—") }}</span>
+                    <span class="balance-add" aria-hidden="true">+</span>
+                </a>
+                {% endblock %}
+
+                {% block avatar_button %}
+                <a class="avatar-btn" href="/profile" aria-label="Профиль">
+                    <img src={{ my_avatar }} alt="Аватар">
+                </a>
+                {% endblock %}
+
+                {% block header_actions %}{% endblock %}
+            </div>
+        </div>
+    </header>
+    {% endif %}
+    {% endblock %}
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if user %}
+    {% block bottom_nav %}
+    <nav class="bottom-nav">
+        <div class="nav-inner">
+            <a href="/" class="{% if active_tab=='home' %}active{% endif %}" aria-label="Главная">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 10.5 12 3l9 7.5"></path>
+                    <path d="M5.5 10.5V21h13V10.5"></path>
+                </svg>
+                Главная
+            </a>
+            <a href="/store" class="{% if active_tab=='stores' %}active{% endif %}" aria-label="Магазины">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 9l1.5-5h15L21 9"></path>
+                    <path d="M5 9v12h14V9"></path>
+                    <path d="M9 21V13h6v8"></path>
+                </svg>
+                Магазины
+            </a>
+            <a href="/transfer" class="{% if active_tab=='transfer' %}active{% endif %}" aria-label="Карта">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                    <line x1="2" y1="10" x2="22" y2="10"/>
+                    <rect x="6" y="12" width="4" height="3" rx="0.5"/>
+                    <line x1="14" y1="13" x2="18" y2="13"/>
+                </svg>
+                Карта
+            </a>
+            <a href="/profile" class="{% if active_tab=='menu' %}active{% endif %}" aria-label="Профиль">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+                </svg>
+                Профиль
+            </a>
+        </div>
+    </nav>
+    {% endblock %}
+    {% endif %}
+
+    {% block scripts %}{% endblock %}
+</div>
+</body>
+</html>

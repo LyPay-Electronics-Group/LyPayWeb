@@ -2,6 +2,8 @@ from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from scripts.base_context import build_base_context
+
 from .utils import authenticate_user, register_user, send_verification_code, verify_code
 
 router = APIRouter()
@@ -14,22 +16,21 @@ def _clear_registration_session(request: Request) -> None:
     request.session.pop("registration_corp_record", None)
 
 
-def _registration_template(
-        request: Request,
-        *,
-        email: str = "",
-        code_sent: bool = False,
-        error: Exception | None = None,
-        status_code: int = 200,
+async def _registration_template(
+    request: Request,
+    *,
+    email: str = "",
+    code_sent: bool = False,
+    error: Exception | None = None,
+    status_code: int = 200,
 ):
     return templates.TemplateResponse(
-        "register.html",
-        {
-            "request": request,
-            "code_sent": code_sent,
-            "email": email,
-            "error": error,
-        },
+        "auth/register.html",
+        await build_base_context(
+            request,
+            hide_header=True,
+            extra={"code_sent": code_sent, "email": email, "error": error},
+        ),
         status_code=status_code,
     )
 
@@ -39,7 +40,7 @@ def _registration_template(
 async def login_page(request: Request):
     if request.session.get("user"):
         return RedirectResponse(url="/profile", status_code=303)
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("auth/login.html", await build_base_context(request, hide_header=True))
 
 
 @router.post("/login")
@@ -47,8 +48,12 @@ async def login(request: Request, identifier: str = Form(...), password: str = F
     user = await authenticate_user(identifier.strip(), password)
     if not user:
         return templates.TemplateResponse(
-            "login.html",
-            {"request": request, "error": "Неверный логин/email или пароль."},
+            "auth/login.html",
+            await build_base_context(
+                request,
+                hide_header=True,
+                extra={"error": "Неверный логин/email или пароль."},
+            ),
             status_code=401,
         )
     request.session["user"] = {"ID": user["ID"], "email": user["email"]}
@@ -67,7 +72,7 @@ async def register_page(request: Request):
         _clear_registration_session(request)
         code_sent = False
 
-    return _registration_template(request, email=email, code_sent=code_sent)
+    return await _registration_template(request, email=email, code_sent=code_sent)
 
 
 @router.post("/register/send-code")
@@ -78,7 +83,7 @@ async def register_send_code(request: Request, email: str = Form(...)):
     try:
         corp_record = await send_verification_code(candidate_email)
     except Exception as e:
-        return _registration_template(
+        return await _registration_template(
             request,
             email=candidate_email,
             code_sent=False,
@@ -97,10 +102,10 @@ async def register_send_code(request: Request, email: str = Form(...)):
 
 @router.post("/register/verify")
 async def register_verify(
-        request: Request,
-        code: str = Form(...),
-        password: str = Form(...),
-        login: str = Form(...),
+    request: Request,
+    code: str = Form(...),
+    password: str = Form(...),
+    login: str = Form(...),
 ):
     email = request.session.get("registration_email")
     code_sent = bool(request.session.get("registration_code_sent", False))
@@ -121,14 +126,13 @@ async def register_verify(
         request.session["user"] = {"ID": user_id}
         return RedirectResponse(url="/profile", status_code=303)
     except Exception as e:
-        return _registration_template(
+        return await _registration_template(
             request,
             email=email,
             code_sent=True,
             error=e,
             status_code=400,
         )
-
 
 
 # --- Выход ---

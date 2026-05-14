@@ -1,26 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>LyPay - Профиль</title>
-    <style>
-        .avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #ccc;
-        }
-        .message { color: green; margin: 10px 0; }
-        .error { color: red; margin: 10px 0; }
-    </style>
-</head>
-<body>
-    <div class="nav">
-        <a href="/">Главная</a>
-        <a href="/profile">Профиль</a>
-        <a href="/logout">Выйти</a>
-    </div>
+{% extends "base.html" %}
+{% block title %}Профиль — LyPay{% endblock %}
+{% block content %}
 
+<div class="card">
     <h1>Профиль пользователя</h1>
     <div class="avatar-section">
         <img
@@ -50,5 +32,5 @@
         </tr>
         {% endfor %}
     </table>
-</body>
-</html>
+</div>
+{% endblock %}

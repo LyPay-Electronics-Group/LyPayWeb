@@ -10,6 +10,7 @@ from scripts.firewall_validator import firewall_validate_factory as FVF
 from LyPayAPI.user.info import get
 from LyPayAPI.user.settings.avatar import update as update_avatar, get as get_avatar
 from LyPayAPI.__exceptions__ import IDNotFound
+from scripts.base_context import build_base_context
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html")
@@ -75,12 +76,18 @@ async def profile_page(
     except Exception as e:
         avatar = "/static/skill_issue.jpg"
 
-    return templates.TemplateResponse("profile.html", {
-        "request": request,
-        "user": clean_user_info,
-        "avatar": avatar,
-        "is_self": ID == user_id,
-    })
+    return templates.TemplateResponse(
+        "profile/profile.html",
+        await build_base_context(
+            request,
+            active_tab="menu",
+            extra={
+                "user": clean_user_info,
+                "avatar": avatar,
+                "is_self": ID == user_id,
+            },
+        ),
+    )
 
 
 @router.post("/profile/avatar")

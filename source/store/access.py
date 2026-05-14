@@ -8,8 +8,10 @@ from LyPayAPI.store.info import get, get_by_shopkeeper
 from LyPayAPI.store import access
 from LyPayAPI.__exceptions__ import IDNotFound, UserIsAlreadyShopkeeper
 
+from scripts.base_context import build_base_context
+
 router = APIRouter()
-templates = Jinja2Templates(directory="html/store/access")
+templates = Jinja2Templates(directory="html")
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -29,12 +31,15 @@ async def access_page(
         return RedirectResponse("/store", status_code=303)
 
     return templates.TemplateResponse(
-        "access.html",
-        {
-            "request": request,
-            "store": await get(current_storeID),
-            "shopkeepers": [sk for sk in await access.get_list(current_storeID) if sk != user_info["ID"]],
-        }
+        "store/access.html",
+        await build_base_context(
+            request,
+            active_tab="stores",
+            extra={
+                "store": await get(current_storeID),
+                "shopkeepers": [sk for sk in await access.get_list(current_storeID) if sk != user_info["ID"]],
+            },
+        ),
     )
 
 

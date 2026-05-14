@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+
+from scripts.base_context import build_base_context
+
 from LyPayAPI.store.registration import check_link, get_ID, new, send_email
 from LyPayAPI.store.info import get_all_shopkeepers
 
 router = APIRouter()
-templates = Jinja2Templates(directory="html/store/register")
+templates = Jinja2Templates(directory="html")
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -19,14 +22,11 @@ async def register_store_page(request: Request):
 
     await send_email("behtin.gm@students.sch2.ru")  # TEMP
     request.session["store"] = {"registration": True}
-    return templates.TemplateResponse("register.html", {"request": request})
+    return templates.TemplateResponse("store/register.html", await build_base_context(request, active_tab="stores"))
 
 
 @router.post("/")
-async def check_store_code(
-        request: Request,
-        code: str = Form(...)
-):
+async def check_store_code(request: Request, code: str = Form(...)):
     user_info = request.session.get("user")
     email = user_info["email"]
     print(user_info)
@@ -34,12 +34,15 @@ async def check_store_code(
 
     if not is_valid:
         return templates.TemplateResponse(
-            "register.html",
-            {"request": request, "error": "Неверный код", "user": user_info}
+            "store/register.html",
+            await build_base_context(
+                request,
+                active_tab="stores",
+                extra={"error": "Неверный код", "user": user_info},
+            ),
         )
 
     request.session["store"]["host_id"] = user_info["ID"]
-
     return RedirectResponse(url="/store/register/select-id", status_code=303)
 
 
@@ -49,19 +52,14 @@ async def select_store_id_page(request: Request):
         return RedirectResponse(url="/store/register", status_code=303)
 
     variants = [await get_ID() for _ in range(10)]
-
     return templates.TemplateResponse(
-        "select_id.html",
-        {"request": request, "variants": variants}
+        "store/select_id.html",
+        await build_base_context(request, active_tab="stores", extra={"variants": variants}),
     )
 
 
 @router.post("/select-id")
-async def create_store(
-        request: Request,
-        store_id: str = Form(...),
-        name: str = Form(...)
-):
+async def create_store(request: Request, store_id: str = Form(...), name: str = Form(...)):
     reg_data = request.session.get("user", None)
     if reg_data is None:
         return RedirectResponse(url="/login", status_code=303)
@@ -72,7 +70,7 @@ async def create_store(
         storeID=store_id,
         email=reg_data["email"],
         name=name,
-        hostID=reg_data["ID"]
+        hostID=reg_data["ID"],
     )
 
     return RedirectResponse(url="/profile", status_code=303)

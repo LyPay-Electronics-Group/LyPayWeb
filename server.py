@@ -1,13 +1,17 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import FileResponse
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 from source.test import router as test_router
 from source.auth import router as auth_router
 from source.mst import router as mst_router
 from source.store import router as store_router
 from source.profile import router as profile_router
+
+from scripts.base_context import build_base_context
 
 from logging import getLogger, StreamHandler
 from sys import stdout
@@ -33,10 +37,12 @@ app.include_router(mst_router, prefix='/mst')
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+templates = Jinja2Templates(directory="html")
 
-@app.get("/")
-async def root():
-    return "LyPay Forever!"
+
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", await build_base_context(request, active_tab="home"))
 
 
 @app.get('/favicon.ico', include_in_schema=False)

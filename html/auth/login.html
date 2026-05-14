@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Вход в LyPay{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 440px; margin: 2rem auto;">
+    <h2 class="text-center">Вход в систему</h2>
+    <form method="post" action="/login" class="mt-2">
+        <div style="margin-bottom: 1rem;">
+            <label>Email или логин</label><br>
+            <input type="text" name="identifier" required style="width:100%; padding:0.6rem; border:1px solid var(--border); border-radius:8px;">
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <label>Пароль</label><br>
+            <input type="password" name="password" required style="width:100%; padding:0.6rem; border:1px solid var(--border); border-radius:8px;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Войти</button>
+    </form>
+    <p class="mt-1 text-center" style="font-size:0.9rem;">
+        Нет аккаунта? <a href="/register">Зарегистрироваться</a>
+    </p>
+</div>
+{% endblock %}
