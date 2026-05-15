@@ -1,16 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head><title>{{store.name}}</title></head>
-<body>
-    <h1>{{store.name}}</h1>
-    {% if store %}
-        <ul>
+{% extends "base.html" %}
+{% block title %}Магазины — LyPay{% endblock %}
+
+{% block content %}
+{% if store %}
+<div class="card">
+    <h2 style="margin-bottom: 8px;">{{ store.name }}</h2>
+    <div style="color: var(--text-secondary); margin-bottom: 12px;">ID: <strong>{{ store.ID }}</strong></div>
+
+    <div style="display: grid; gap: 8px; font-size: 0.98rem;">
         {% for key, value in store.items() %}
-                <strong>{{ key }}</strong> {{ value }}
+        {% if key not in ["items"] %}
+        <div style="display:flex; justify-content:space-between; gap:10px;">
+            <strong style="flex: 0 0 auto;">{{ key }}</strong>
+            <span style="flex: 1 1 auto; text-align:right; color: var(--text-secondary); overflow:hidden; text-overflow:ellipsis;">{{ value }}</span>
+        </div>
+        {% endif %}
         {% endfor %}
-        </ul>
-    {% else %}
-        <p>У вас пока нет магазинов. <a href="/store/register">Зарегистрировать новый</a></p>
-    {% endif %}
-</body>
-</html>
+    </div>
+
+    <div class="mt-2" style="display:grid; gap:10px;">
+        <a class="btn btn-primary" style="text-decoration: 0" href="/store/items">Ассортимент</a>
+        <a class="btn btn-primary" style="text-decoration: 0" href="/store/access">Доступ</a>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <h2>Магазин не найден</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 14px;">У вас пока нет магазинов.</p>
+    <a class="btn btn-primary" href="/store/register">Зарегистрировать новый</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,24 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head><title>Настройки доступа</title></head>
-<body>
-    <h1>Настройки доступа</h1>
-    {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
-    <h3>{{ store.ID }}</h3>
-    <h4>{{ store.name }}</h4>
-    <br><br>
+{% extends "base.html" %}
+{% block title %}Доступ — LyPay{% endblock %}
+{% block page_title %}Магазин{% endblock %}
+
+{% block head %}
+<style>
+    .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .row:last-child {
+        border-bottom: none;
+    }
+
+    .mini-btn {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Настройки доступа</h2>
+    {% if error %}<p style="color: var(--danger); margin-bottom: 10px;">{{ error }}</p>{% endif %}
+    <div style="color: var(--text-secondary); margin-bottom: 12px;">{{ store.name }} · ID: <strong>{{ store.ID }}</strong></div>
+
     <div id="container">
         {% for id in shopkeepers %}
-        <div id="{{ id }}-div">
-            <p>ID: <a href="/profile/{{ id }}">{{ id }}</a></p>
-            <button id="{{ id }}">[ remove ]</button><br>
+        <div class="row" id="{{ id }}-div">
+            <div>
+                <div style="font-weight: 700;">ID: <a href="/profile/{{ id }}">{{ id }}</a></div>
+            </div>
+            <button class="mini-btn" id="{{ id }}" type="button">Удалить</button>
         </div>
         {% endfor %}
     </div>
-    <br><br><br><br>
-    <button id="plus">[ + ]</button>
-    <label for="plus-source">Введите ID пользователя для добавления: </label><input type="text" id="plus-source">
-</body>
+
+    <div class="mt-2" style="display:grid; gap:10px;">
+        <label for="plus-source" style="font-weight: 600;">Добавить пользователя по ID</label>
+        <input type="text" id="plus-source" inputmode="numeric" autocomplete="off"
+               style="width:100%; padding:0.7rem; border:1px solid var(--border); border-radius:10px;">
+        <button id="plus" class="btn btn-primary" type="button">Добавить</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
 <script>
 {% for id in shopkeepers %}
 const btn_{{ id }} = document.getElementById('{{ id }}');
@@ -53,8 +88,10 @@ document.getElementById('plus').addEventListener('click', async () => {
         new_div.appendChild(p);
 
         const b = document.createElement('button');
-        b.textContent = '[ remove ]';
+        b.textContent = 'Удалить';
         b.id = id;
+        b.className = 'mini-btn';
+        b.type = 'button';
         b.addEventListener('click', async () => {
             const response = await fetch(`/store/access/remove?ID=${id}`, {
                 method: 'GET',
@@ -69,4 +106,4 @@ document.getElementById('plus').addEventListener('click', async () => {
     }
 });
 </script>
-</html>
+{% endblock %}

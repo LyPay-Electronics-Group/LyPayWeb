@@ -99,6 +99,7 @@
             background: rgba(37, 99, 235, 0.35);
             border: 1px solid rgba(15, 23, 42, 0.08);
             backdrop-filter: blur(10px);
+            text-decoration: none;
         }
 
         .balance-amount {
@@ -111,8 +112,8 @@
         }
 
         .balance-add {
-            width: 38px;
-            height: 38px;
+            width: 47px;
+            height: 47px;
             border: none;
             background: rgba(37, 99, 235, 0.55);
             color: #0b1020;
@@ -175,7 +176,8 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            padding: 16px;
+            height: 44px;
+            padding: 12px;
             font-size: 1.05rem;
             font-weight: 600;
             border: none;
@@ -281,7 +283,7 @@
     <header class="app-header">
         <div class="header-row">
             <div class="brand">
-                <a class="brand-link" href="/" aria-label="На главную">{% block page_title %}LyPay{% endblock %}</a>
+                <a class="brand-link" href="/" aria-label="На главную">LyPay</a>
             </div>
             <div class="header-actions">
                 {% block balance %}
@@ -293,7 +295,7 @@
 
                 {% block avatar_button %}
                 <a class="avatar-btn" href="/profile" aria-label="Профиль">
-                    <img src={{ my_avatar }} alt="Аватар">
+                    <img src="{{ my_avatar }}" alt="Аватар">
                 </a>
                 {% endblock %}
 

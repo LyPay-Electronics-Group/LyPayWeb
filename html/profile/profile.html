@@ -1,36 +1,93 @@
 {% extends "base.html" %}
 {% block title %}Профиль — LyPay{% endblock %}
-{% block content %}
+{% block page_title %}Профиль{% endblock %}
 
+{% block head %}
+<style>
+    .profile-top {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .profile-name {
+        font-weight: 900;
+        font-size: 1.25rem;
+        line-height: 1.2;
+    }
+
+    .profile-sub {
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+
+    .notice {
+        margin-top: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: #fff;
+        font-weight: 600;
+    }
+
+    .notice.ok {
+        border-color: rgba(5, 150, 105, 0.25);
+        background: rgba(5, 150, 105, 0.08);
+        color: #065f46;
+    }
+
+    .notice.err {
+        border-color: rgba(220, 38, 38, 0.25);
+        background: rgba(220, 38, 38, 0.08);
+        color: #7f1d1d;
+    }
+
+    .file-input {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="card">
-    <h1>Профиль пользователя</h1>
-    <div class="avatar-section">
-        <img
-            src={{avatar}}
-            alt="Аватар"
-            class="avatar"
-        >
-        {% if is_self %}
-        <form action="/profile/avatar" method="post" enctype="multipart/form-data" style="margin-top: 10px;">
-            <input type="file" name="file" accept="image" required>
-            <button type="submit">Обновить аватар</button>
-        </form>
-        {% endif %}
+    <div class="profile-top">
+        <img src="{{ avatar }}" alt="Аватар" class="avatar">
+        <div style="min-width: 0;">
+            <div class="profile-name">{{ user.get("Имя") or "Пользователь" }}</div>
+            <div class="profile-sub">
+                ID: <strong>{{ user.get("ID") }}</strong>
+                {% if user.get("Логин") %}· @{{ user.get("Логин") }}{% endif %}
+            </div>
+        </div>
     </div>
 
     {% if request.query_params.message %}
-    <div class="message">{{ request.query_params.message }}</div>
+    <div class="notice ok">{{ request.query_params.message }}</div>
     {% endif %}
     {% if request.query_params.error %}
-    <div class="error">{{ request.query_params.error }}</div>
+    <div class="notice err">{{ request.query_params.error }}</div>
     {% endif %}
-    <table>
+
+    <div style="display: grid; gap: 8px; font-size: 0.98rem;">
         {% for key, value in user.items() %}
-        <tr>
-            <th>{{ key }}</th>
-            <td>{{ value }}</td>
-        </tr>
+        <div style="display:flex; justify-content:space-between; gap:10px;">
+            <strong style="flex: 0 0 auto;">{{ key }}</strong>
+            <span style="flex: 1 1 auto; text-align:right; color: var(--text-secondary); overflow:hidden; text-overflow:ellipsis;">{{ value }}</span>
+        </div>
         {% endfor %}
-    </table>
+    </div>
+
+    {% if is_self %}
+    <div class="mt-2" style="display:grid; gap:10px;">
+        <form action="/profile/avatar" method="post" enctype="multipart/form-data" style="display:grid; gap:10px;">
+            <input class="file-input" type="file" name="file" accept="image/*" required>
+            <button class="btn btn-primary" type="submit">Обновить аватар</button>
+        </form>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

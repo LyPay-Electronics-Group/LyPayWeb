@@ -3,7 +3,7 @@ from LyPayAPI.user.info import get_by_email, get_by_login
 from LyPayAPI.__exceptions__ import APIError, EmailNotFound, IDAlreadyExists
 
 
-async def send_verification_code(email: str) -> dict[str, ...]:
+async def send_verification_code(email: str):
     """
     Проверяет, что email ещё не зарегистрирован, и отправляет на него код подтверждения.
     Возвращает corp_record.
@@ -15,9 +15,9 @@ async def send_verification_code(email: str) -> dict[str, ...]:
     except EmailNotFound:
         existing_user = None
 
-    if existing_user:
-        raise IDAlreadyExists
-
+    #    if existing_user:
+    #        raise IDAlreadyExists
+    # todo: fix wrong error
     await send_email(route="main", participant=email)
     return corp_record
 

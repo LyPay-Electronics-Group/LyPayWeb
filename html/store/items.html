@@ -1,36 +1,109 @@
-<!DOCTYPE html>
-<html>
-<head><title>Ассортимент</title></head>
+{% extends "base.html" %}
+{% block title %}Ассортимент — LyPay{% endblock %}
+
+{% block head %}
 <style>
-    .item {
-        display: flex;
-        justify-content: space-between;
-        margin: 0;
+    .item-card {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: #fff;
+    }
+
+    .fields {
+        display: grid;
+        gap: 10px;
+    }
+
+    .field label {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+    }
+
+    .field input {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+    }
+
+    .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .mini-btn {
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 700;
+    }
+
+    .mini-btn-primary {
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--primary);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+    }
+
+    .mini-btn-danger {
+        background: rgba(220, 38, 38, 0.10);
+        color: var(--danger);
+        border: 1px solid rgba(220, 38, 38, 0.22);
     }
 </style>
-<body>
-    <h1>Ассортимент</h1>
-    {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
-    <h3>{{ store.ID }}</h3>
-    <h4>{{ store.name }}</h4>
-    <br><br>
-    <div id="container">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Ассортимент</h2>
+    {% if error %}<p style="color: var(--danger); margin-bottom: 10px;">{{ error }}</p>{% endif %}
+    <div style="color: var(--text-secondary); margin-bottom: 12px;">{{ store.name }} · ID: <strong>{{ store.ID }}</strong></div>
+
+    <div id="container" style="display:grid; gap:12px;">
         {% for item in items %}
-        <div id="{{ item.itemID }}-div">
-            <p class="item">
-                <span><input type="text" id="{{ item.itemID }}-name" value="{{ item.name }}" disabled autocomplete="off" /></span>
-                <span><input type="number" id="{{ item.itemID }}-price" value="{{ item.price }}" disabled autocomplete="off" /><p> Тгр.</p></span>
-            </p>
-            <button id="{{ item.itemID }}-toggle">[ edit ]</button><br>
-            <button id="{{ item.itemID }}-remove">[ remove ]</button><br>
-            <p id="{{ item.itemID }}-msg"></p>
+        <div class="item-card" id="{{ item.itemID }}-div">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <div style="font-weight: 800;">{{ item.name }}</div>
+                <div style="color: var(--text-secondary); white-space: nowrap;">
+                    <span id="{{ item.itemID }}-price-view">{{ item.price }}</span> тгр.
+                </div>
+            </div>
+
+            <div class="fields">
+                <div class="field">
+                    <label for="{{ item.itemID }}-name">Название</label>
+                    <input type="text" id="{{ item.itemID }}-name" value="{{ item.name }}" disabled autocomplete="off"/>
+                </div>
+                <div class="field">
+                    <label for="{{ item.itemID }}-price">Цена (тгр.)</label>
+                    <input type="number" id="{{ item.itemID }}-price" value="{{ item.price }}" disabled autocomplete="off"/>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="mini-btn mini-btn-primary" id="{{ item.itemID }}-toggle" type="button">Редактировать</button>
+                <button class="mini-btn mini-btn-danger" id="{{ item.itemID }}-remove" type="button">Удалить</button>
+            </div>
+            <div id="{{ item.itemID }}-msg" style="color: var(--text-secondary); font-size: 0.9rem;"></div>
         </div>
         {% endfor %}
     </div>
-    <br><br><br><br>
-    <button id="plus">[ + ]</button>
-    <label for="plus-source">test test test: </label><input type="text" id="plus-source">
-</body>
+
+    <div class="mt-2" style="display:grid; gap:10px;">
+        <label for="plus-source" style="font-weight: 600;">Добавить товар (пока тест)</label>
+        <input type="text" id="plus-source" autocomplete="off"
+               style="width:100%; padding:0.7rem; border:1px solid var(--border); border-radius:10px;">
+        <button id="plus" class="btn btn-primary" type="button">Добавить</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
 <script>
 {% for item in items %}
 const toggle_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-toggle');
@@ -55,7 +128,7 @@ toggle_{{ item.itemID }}.addEventListener('click', async () => {
             method: 'GET',
             headers: {'Content-Type': 'application/json'}
         });
-        if (response.status >= 400) { toggle_{{ id }}.disabled = true; }
+        if (response.status >= 400) { toggle_{{ id }}.disabled = true; } // todo: чекнуть откуда id
         else {
             toggle_{{ item.itemID }}.textContent = "[ edit ]";
             msg_{{ item.itemID }}.textContent = "saved!";
@@ -81,7 +154,4 @@ price_{{ item.itemID }}.addEventListener('keydown', (e) => {
 
 {% endfor %}
 </script>
-<script>
-
-</script>
-</html>
+{% endblock %}
