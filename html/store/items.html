@@ -112,11 +112,9 @@ const name_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-name')
 const price_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-price');
 const msg_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-msg');
 const div_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-div');
-let enable_flag_{{ item.itemID }} = false;
 remove_{{ item.itemID }}.addEventListener('click', () => { div_{{ item.itemID }}.remove(); });
 toggle_{{ item.itemID }}.addEventListener('click', async () => {
-    enable_flag_{{ item.itemID }} = !enable_flag_{{ item.itemID }};
-    if (enable_flag_{{ item.itemID }}) {
+    if (name_{{ item.itemID }}.disabled) {
         name_{{ item.itemID }}.disabled = false;
         price_{{ item.itemID }}.disabled = false;
         toggle_{{ item.itemID }}.textContent = "[ save ]";
@@ -135,23 +133,6 @@ toggle_{{ item.itemID }}.addEventListener('click', async () => {
         }
     }
 });
-/*
-name_{{ item.itemID }}.addEventListener('blur', () => {
-    name_{{ item.itemID }}.disabled = true;
-});
-name_{{ item.itemID }}.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter')
-        name_{{ item.itemID }}.blur();
-});
-price_{{ item.itemID }}.addEventListener('blur', () => {
-    price_{{ item.itemID }}.disabled = true;
-});
-price_{{ item.itemID }}.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter')
-        price_{{ item.itemID }}.blur();
-});
-*/
-
 {% endfor %}
 </script>
 {% endblock %}
