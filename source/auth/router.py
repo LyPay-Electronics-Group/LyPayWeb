@@ -138,5 +138,5 @@ async def register_verify(
 # --- Выход ---
 @router.get("/logout")
 async def logout(request: Request):
-    request.session.pop("user")
+    request.session.pop("user", None)
     return RedirectResponse(url="/login", status_code=303)

@@ -6,6 +6,7 @@ from scripts.base_context import build_base_context
 
 from LyPayAPI.store.registration import check_link, get_ID, new, send_email
 from LyPayAPI.store.info import get_all_shopkeepers
+from LyPayAPI.user.info import get
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html")
@@ -20,7 +21,7 @@ async def register_store_page(request: Request):
     if user_info["ID"] in await get_all_shopkeepers():
         return RedirectResponse(url="/store", status_code=303)
 
-    await send_email("behtin.gm@students.sch2.ru")  # TEMP
+    #await send_email("mandzhiev.ts@students.sch2.ru")  # TEMP
     request.session["store"] = {"registration": True}
     return templates.TemplateResponse("store/register.html", await build_base_context(request, active_tab="stores"))
 
@@ -28,8 +29,9 @@ async def register_store_page(request: Request):
 @router.post("/")
 async def check_store_code(request: Request, code: str = Form(...)):
     user_info = request.session.get("user")
-    email = user_info["email"]
-    print(user_info)
+    ID = user_info["ID"]
+    user = await get(ID)
+    email = user["email"]
     is_valid = await check_link(email, code)
 
     if not is_valid:
@@ -60,17 +62,20 @@ async def select_store_id_page(request: Request):
 
 @router.post("/select-id")
 async def create_store(request: Request, store_id: str = Form(...), name: str = Form(...)):
-    reg_data = request.session.get("user", None)
-    if reg_data is None:
+    user_info = request.session.get("user")
+    if user_info is None:
         return RedirectResponse(url="/login", status_code=303)
+    ID = user_info["ID"]
+    user = await get(ID)
+    email = user["email"]
     request.session["store"]["ID"] = store_id
     request.session["store"]["name"] = name
 
     await new(
         storeID=store_id,
-        email=reg_data["email"],
+        email=email,
         name=name,
-        hostID=reg_data["ID"],
+        hostID=ID,
     )
 
-    return RedirectResponse(url="/profile", status_code=303)
+    return RedirectResponse(url="/store", status_code=303)
