@@ -36,14 +36,16 @@ async def build_base_context(
         except Exception:
             pass
 
-        try:
-            api_answer = await get_avatar(user_id)
-            if api_answer is not None:
-                avatar, _updated = api_answer
-                avatar_url = "/" + str(avatar).lstrip("/")
-                ctx["my_avatar"] = avatar_url
-        except Exception:
-            pass
+    try:
+        api_answer = await get_avatar(user_id)
+        if api_answer is not None:
+            avatar, updated = api_answer
+            avatar_url = "/" + str(avatar).lstrip("/")
+            ctx["my_avatar"] = avatar_url
+        else:
+            raise Exception
+    except Exception as e:
+        ctx["my_avatar"] = "/static/skill_issue.jpg"
 
     if extra:
         ctx.update(extra)
