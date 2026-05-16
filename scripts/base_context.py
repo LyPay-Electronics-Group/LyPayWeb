@@ -13,7 +13,7 @@ def _format_balance(balance: Any) -> str | None:
         value = int(balance)
     except Exception:
         return str(balance)
-    return f"{value:,}".replace(",", " ") + " тгр"
+    return f"{value:,}".replace(",", " ") + " Тгр."
 
 
 async def build_base_context(
