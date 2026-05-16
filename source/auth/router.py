@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from scripts.base_context import build_base_context
 
 from .utils import authenticate_user, register_user, send_verification_code, verify_code
+from source.errors import is_bad_firewall_error, to_user_message
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html")
@@ -21,7 +22,7 @@ async def _registration_template(
     *,
     email: str = "",
     code_sent: bool = False,
-    error: Exception | None = None,
+    error: str | None = None,
     status_code: int = 200,
 ):
     return templates.TemplateResponse(
@@ -83,11 +84,13 @@ async def register_send_code(request: Request, email: str = Form(...)):
     try:
         corp_record = await send_verification_code(candidate_email)
     except Exception as e:
+        if is_bad_firewall_error(e):
+            return RedirectResponse(url="/bad-firewall-status", status_code=303)
         return await _registration_template(
             request,
             email=candidate_email,
             code_sent=False,
-            error=e,
+            error=to_user_message(e),
             status_code=400,
         )
 
@@ -117,20 +120,24 @@ async def register_verify(
         if not await verify_code(email, code):
             raise ValueError("Неверный код.")
 
-        corp_record = request.session.get("registration_corp_record")
+        corp_record = request.session.get("registration_corp_record") or {}
         name = corp_record.get("name")
         group = corp_record.get("group")
+        if not name or not group:
+            raise ValueError("Данные для регистрации не найдены. Попробуйте отправить код ещё раз.")
 
         user_id = await register_user(email, password, login, name=name, group=group)
         _clear_registration_session(request)
         request.session["user"] = {"ID": user_id}
         return RedirectResponse(url="/profile", status_code=303)
     except Exception as e:
+        if is_bad_firewall_error(e):
+            return RedirectResponse(url="/bad-firewall-status", status_code=303)
         return await _registration_template(
             request,
             email=email,
             code_sent=True,
-            error=e,
+            error=to_user_message(e),
             status_code=400,
         )
 

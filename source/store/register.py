@@ -7,6 +7,7 @@ from scripts.base_context import build_base_context
 from LyPayAPI.store.registration import check_link, get_ID, new, send_email
 from LyPayAPI.store.info import get_all_shopkeepers
 from LyPayAPI.user.info import get
+from source.errors import is_bad_firewall_error, to_user_message
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html")
@@ -18,8 +19,17 @@ async def register_store_page(request: Request):
     if user_info is None:
         return RedirectResponse(url="/login", status_code=303)
 
-    if user_info["ID"] in await get_all_shopkeepers():
-        return RedirectResponse(url="/store", status_code=303)
+    try:
+        if user_info["ID"] in await get_all_shopkeepers():
+            return RedirectResponse(url="/store", status_code=303)
+    except Exception as e:
+        if is_bad_firewall_error(e):
+            return RedirectResponse(url="/bad-firewall-status", status_code=303)
+        return templates.TemplateResponse(
+            "store/register.html",
+            await build_base_context(request, active_tab="stores", extra={"error": to_user_message(e)}),
+            status_code=503,
+        )
 
     #await send_email("mandzhiev.ts@students.sch2.ru")  # TEMP
     request.session["store"] = {"registration": True}
@@ -29,10 +39,22 @@ async def register_store_page(request: Request):
 @router.post("/")
 async def check_store_code(request: Request, code: str = Form(...)):
     user_info = request.session.get("user")
-    ID = user_info["ID"]
-    user = await get(ID)
-    email = user["email"]
-    is_valid = await check_link(email, code)
+    if user_info is None:
+        return RedirectResponse(url="/login", status_code=303)
+
+    try:
+        ID = user_info["ID"]
+        user = await get(ID)
+        email = user["email"]
+        is_valid = await check_link(email, code)
+    except Exception as e:
+        if is_bad_firewall_error(e):
+            return RedirectResponse(url="/bad-firewall-status", status_code=303)
+        return templates.TemplateResponse(
+            "store/register.html",
+            await build_base_context(request, active_tab="stores", extra={"error": to_user_message(e), "user": user_info}),
+            status_code=400,
+        )
 
     if not is_valid:
         return templates.TemplateResponse(
@@ -44,7 +66,8 @@ async def check_store_code(request: Request, code: str = Form(...)):
             ),
         )
 
-    request.session["store"]["host_id"] = user_info["ID"]
+    request.session.setdefault("store", {})["host_id"] = user_info["ID"]
+    request.session["store"]["registration"] = True
     return RedirectResponse(url="/store/register/select-id", status_code=303)
 
 
@@ -53,7 +76,16 @@ async def select_store_id_page(request: Request):
     if "store" not in request.session or not request.session["store"].get("registration", False):
         return RedirectResponse(url="/store/register", status_code=303)
 
-    variants = [await get_ID() for _ in range(10)]
+    try:
+        variants = [await get_ID() for _ in range(10)]
+    except Exception as e:
+        if is_bad_firewall_error(e):
+            return RedirectResponse(url="/bad-firewall-status", status_code=303)
+        return templates.TemplateResponse(
+            "store/register.html",
+            await build_base_context(request, active_tab="stores", extra={"error": to_user_message(e)}),
+            status_code=503,
+        )
     return templates.TemplateResponse(
         "store/select_id.html",
         await build_base_context(request, active_tab="stores", extra={"variants": variants}),
@@ -65,17 +97,44 @@ async def create_store(request: Request, store_id: str = Form(...), name: str = 
     user_info = request.session.get("user")
     if user_info is None:
         return RedirectResponse(url="/login", status_code=303)
+    if "store" not in request.session or not request.session["store"].get("registration", False):
+        return RedirectResponse(url="/store/register", status_code=303)
     ID = user_info["ID"]
-    user = await get(ID)
-    email = user["email"]
-    request.session["store"]["ID"] = store_id
-    request.session["store"]["name"] = name
+    try:
+        user = await get(ID)
+        email = user["email"]
+        request.session["store"]["ID"] = store_id
+        request.session["store"]["name"] = name
 
-    await new(
-        storeID=store_id,
-        email=email,
-        name=name,
-        hostID=ID,
-    )
+        await new(
+            storeID=store_id,
+            email=email,
+            name=name,
+            hostID=ID,
+        )
+    except Exception as e:
+        if is_bad_firewall_error(e):
+            return RedirectResponse(url="/bad-firewall-status", status_code=303)
 
+        try:
+            variants = [await get_ID() for _ in range(10)]
+        except Exception:
+            variants = [store_id]
+
+        return templates.TemplateResponse(
+            "store/select_id.html",
+            await build_base_context(
+                request,
+                active_tab="stores",
+                extra={
+                    "variants": variants,
+                    "error": to_user_message(e),
+                    "selected_store_id": store_id,
+                    "store_name": name,
+                },
+            ),
+            status_code=400,
+        )
+
+    request.session.pop("store", None)
     return RedirectResponse(url="/store", status_code=303)

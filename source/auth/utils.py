@@ -1,6 +1,8 @@
+import re
+
 from LyPayAPI.user.registration import check_email_record, send_email, new, check_code
 from LyPayAPI.user.info import get_by_email, get_by_login
-from LyPayAPI.__exceptions__ import APIError, EmailNotFound, IDAlreadyExists
+from LyPayAPI.__exceptions__ import APIError, EmailNotFound, IDNotFound
 
 
 async def send_verification_code(email: str):
@@ -8,16 +10,18 @@ async def send_verification_code(email: str):
     Проверяет, что email ещё не зарегистрирован, и отправляет на него код подтверждения.
     Возвращает corp_record.
     """
+    if not _is_valid_email(email):
+        raise ValueError("Некорректный email.")
+
     corp_record = await check_email_record(email)
 
     try:
-        existing_user = await get_by_email(email)
+        await get_by_email(email)
     except EmailNotFound:
-        existing_user = None
+        pass
+    else:
+        raise ValueError("Этот email уже зарегистрирован.")
 
-    #    if existing_user:
-    #        raise IDAlreadyExists
-    # todo: fix wrong error
     await send_email(route="main", participant=email)
     return corp_record
 
@@ -42,6 +46,21 @@ async def register_user(
     """
     Регистрирует нового пользователя через LyPayAPI и возвращает ID созданного пользователя.
     """
+    login = login.strip()
+    password = password.strip()
+
+    if not _is_valid_login(login):
+        raise ValueError("Логин содержит недопустимые символы.")
+    if len(password) < 6:
+        raise ValueError("Пароль слишком короткий (минимум 6 символов).")
+
+    try:
+        await get_by_login(login)
+    except IDNotFound:
+        pass
+    else:
+        raise ValueError("Этот логин уже занят.")
+
     user_id = await new(
         email=email,
         login=login,
@@ -69,3 +88,15 @@ async def authenticate_user(identifier: str, password: str):
     if user_data and user_data.get("password") == password:
         return user_data
     return None
+
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_LOGIN_RE = re.compile(r"^[A-Za-z0-9_.-]{3,32}$")
+
+
+def _is_valid_email(email: str) -> bool:
+    return bool(_EMAIL_RE.match(email.strip()))
+
+
+def _is_valid_login(login: str) -> bool:
+    return bool(_LOGIN_RE.match(login.strip()))

@@ -16,6 +16,8 @@ from scripts.base_context import build_base_context
 from logging import getLogger, StreamHandler
 from sys import stdout
 from middleware.logger import CustomLog
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.responses import Response
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -43,6 +45,27 @@ templates = Jinja2Templates(directory="html")
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("index.html", await build_base_context(request, active_tab="home"))
+
+
+@app.get("/bad-firewall-status", response_class=HTMLResponse, include_in_schema=False)
+async def bad_firewall_status(request: Request):
+    return templates.TemplateResponse(
+        "errors/bad_firewall_status.html",
+        await build_base_context(request),
+        status_code=403,
+    )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> Response:
+    if exc.status_code == 404:
+        return templates.TemplateResponse(
+            "errors/404.html",
+            await build_base_context(request),
+            status_code=404,
+        )
+
+    return HTMLResponse(content=str(exc.detail), status_code=exc.status_code)
 
 
 @app.get('/favicon.ico', include_in_schema=False)

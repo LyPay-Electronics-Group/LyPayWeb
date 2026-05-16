@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Доступ ограничен | LyPay{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 520px; margin: 0 auto;">
+    <h2>Доступ ограничен</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 14px;">
+        Запрос не прошёл проверку фаерволла. Попробуйте войти в аккаунт, обновить страницу, сменить сеть или повторить позже.
+    </p>
+    <a class="btn btn-primary" href="/login">Войти</a>
+</div>
+{% endblock %}
+
