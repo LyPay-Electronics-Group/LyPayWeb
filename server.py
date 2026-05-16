@@ -25,10 +25,10 @@ logger = getLogger("app.requests")
 logger.setLevel(20)  # level INFO
 logger.addHandler(StreamHandler(stdout))
 
-app.add_middleware(CustomLog, app_logger=logger, blacklist=[
+app.add_middleware(CustomLog, app_logger=logger, blacklist=(
     "/mst/machine/local_stats",
     "/mst/machine/core_stats"
-])
+))
 app.add_middleware(SessionMiddleware, secret_key="verysecretkey")  # todo:брать из .env
 
 app.include_router(test_router)
