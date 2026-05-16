@@ -112,24 +112,46 @@ const name_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-name')
 const price_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-price');
 const msg_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-msg');
 const div_{{ item.itemID }} = document.getElementById('{{ item.itemID }}-div');
-remove_{{ item.itemID }}.addEventListener('click', () => { div_{{ item.itemID }}.remove(); });
+let previous_name_{{ item.itemID }};
+let previous_price_{{ item.itemID }};
+remove_{{ item.itemID }}.addEventListener('click', async () => {
+    const query_params = {ID: "{{ item.itemID }}"}
+    const query_string = new URLSearchParams(query_params).toString();
+    const response = await fetch(`/store/items/remove?${query_string}`, {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'}
+    });
+    if (response.status >= 400) msg_{{ item.itemID }}.textContent = "Произошла ошибка при попытке удаления";
+    else div_{{ item.itemID }}.remove();
+});
 toggle_{{ item.itemID }}.addEventListener('click', async () => {
     if (name_{{ item.itemID }}.disabled) {
         name_{{ item.itemID }}.disabled = false;
         price_{{ item.itemID }}.disabled = false;
-        toggle_{{ item.itemID }}.textContent = "[ save ]";
+        toggle_{{ item.itemID }}.textContent = "Сохранить"; // todo: поменять цвет кнопки на зелёный типа сохранить зелёное
+        previous_name_{{ item.itemID }} = name_{{ item.itemID }}.value;
+        previous_price_{{ item.itemID }} = price_{{ item.itemID }}.value;
     }
     else {
         name_{{ item.itemID }}.disabled = true;
         price_{{ item.itemID }}.disabled = true;
-        const response = await fetch(`/store/items/single?ID={{ item.itemID }}&name=${name_{{ item.itemID }}.value}&price=${price_{{ item.itemID }}.value}`, {
-            method: 'GET',
-            headers: {'Content-Type': 'application/json'}
-        });
-        if (response.status >= 400) { toggle_{{ id }}.disabled = true; } // todo: чекнуть откуда id
-        else {
-            toggle_{{ item.itemID }}.textContent = "[ edit ]";
-            msg_{{ item.itemID }}.textContent = "saved!";
+        toggle_{{ item.itemID }}.textContent = "Редактировать"; // todo: поменять цвет кнопки обратно на дефолтный
+        if (previous_name_{{ item.itemID }} !== name_{{ item.itemID }}.value || previous_price_{{ item.itemID }} !== price_{{ item.itemID }}.value) {
+            const query_params = {
+                ID: "{{ item.itemID }}",
+                name: name_{{ item.itemID }}.value,
+                price: price_{{ item.itemID }}.value
+            }
+            const query_string = new URLSearchParams(query_params).toString();
+            const response = await fetch(`/store/items/single?${query_string}`, {
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'}
+            });
+            if (response.status >= 400) {
+                toggle_{{ item.itemID }}.disabled = true;
+                msg_{{ item.itemID }}.textContent = "Произошла ошибка при попытке сохранения";
+            }
+            else msg_{{ item.itemID }}.textContent = "Сохранено!";
         }
     }
 });
