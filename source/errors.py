@@ -15,7 +15,7 @@ from LyPayAPI.__exceptions__ import (
     NotEnoughBalance,
     RegistrationEmailNotFound,
     SubZeroInput,
-    UserIsAlreadyShopkeeper,
+    UserIsAlreadyAShopkeeper,
 )
 
 
@@ -34,7 +34,7 @@ def to_user_message(exc: Exception) -> str:
     if isinstance(exc, BadFireWallCheck):
         return "Запрос не прошёл проверку фаерволла. Попробуйте позже или смените сеть."
 
-    if isinstance(exc, UserIsAlreadyShopkeeper):
+    if isinstance(exc, UserIsAlreadyAShopkeeper):
         return "Вы уже являетесь владельцем (или админом) магазина."
 
     if isinstance(exc, IDAlreadyExists):
