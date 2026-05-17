@@ -50,6 +50,12 @@
         border: 1px solid rgba(37, 99, 235, 0.25);
     }
 
+    .mini-btn-success {
+        background: rgba(34, 197, 94, 0.12);
+        color: var(--success);
+        border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+
     .mini-btn-danger {
         background: rgba(220, 38, 38, 0.10);
         color: var(--danger);
@@ -95,10 +101,15 @@
     </div>
 
     <div class="mt-2" style="display:grid; gap:10px;">
-        <label for="plus-source" style="font-weight: 600;">Добавить товар (пока тест)</label>
-        <input type="text" id="plus-source" autocomplete="off"
-               style="width:100%; padding:0.7rem; border:1px solid var(--border); border-radius:10px;">
-        <button id="plus" class="btn btn-primary" type="button">Добавить</button>
+        <form method="post" action="/store/items/add" style="display:grid; gap:10px;">
+            <label for="new-name" style="font-weight: 600;">Название товара</label>
+            <input type="text" id="new-name" name="name" required autocomplete="off"
+                   style="width:100%; padding:0.7rem; border:1px solid var(--border); border-radius:10px;">
+            <label for="new-price" style="font-weight: 600;">Цена (Тгр.)</label>
+            <input type="number" id="new-price" name="price" required autocomplete="off"
+                   style="width:100%; padding:0.7rem; border:1px solid var(--border); border-radius:10px;">
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </form>
     </div>
 </div>
 {% endblock %}
@@ -128,14 +139,18 @@ toggle_{{ item.itemID }}.addEventListener('click', async () => {
     if (name_{{ item.itemID }}.disabled) {
         name_{{ item.itemID }}.disabled = false;
         price_{{ item.itemID }}.disabled = false;
-        toggle_{{ item.itemID }}.textContent = "Сохранить"; // todo: поменять цвет кнопки на зелёный типа сохранить зелёное
+        toggle_{{ item.itemID }}.textContent = "Сохранить";
+        toggle_{{ item.itemID }}.classList.remove('mini-btn-primary');
+        toggle_{{ item.itemID }}.classList.add('mini-btn-success');
         previous_name_{{ item.itemID }} = name_{{ item.itemID }}.value;
         previous_price_{{ item.itemID }} = price_{{ item.itemID }}.value;
     }
     else {
         name_{{ item.itemID }}.disabled = true;
         price_{{ item.itemID }}.disabled = true;
-        toggle_{{ item.itemID }}.textContent = "Редактировать"; // todo: поменять цвет кнопки обратно на дефолтный
+        toggle_{{ item.itemID }}.textContent = "Редактировать";
+        toggle_{{ item.itemID }}.classList.remove('mini-btn-success');
+        toggle_{{ item.itemID }}.classList.add('mini-btn-primary');
         if (previous_name_{{ item.itemID }} !== name_{{ item.itemID }}.value || previous_price_{{ item.itemID }} !== price_{{ item.itemID }}.value) {
             const query_params = {
                 ID: "{{ item.itemID }}",
