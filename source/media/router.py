@@ -4,13 +4,15 @@ from fastapi.responses import FileResponse
 
 router = APIRouter()
 
-AVATAR_DIR = Path("media/stores_media")
-AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+STORES_AVATAR_DIR = Path("media/stores_media")
+STORES_AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+USERS_AVATAR_DIR = Path("media/users_media")
+USERS_AVATAR_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.get("/media/stores_media/{filename}")
 async def serve_store_avatar(filename: str, request: Request):
-    file_path = AVATAR_DIR / filename
+    file_path = STORES_AVATAR_DIR / filename
     if not file_path.is_file():
         raise HTTPException(status_code=404, detail="Файл не найден")
 
@@ -23,7 +25,7 @@ async def serve_avatar(filename: str, request: Request):
     if user is None:
         raise HTTPException(status_code=401, detail="Требуется авторизация")
 
-    file_path = AVATAR_DIR / filename
+    file_path = USERS_AVATAR_DIR / filename
     if not file_path.is_file():
         raise HTTPException(status_code=404, detail="Файл не найден")
 
