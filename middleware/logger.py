@@ -11,7 +11,7 @@ c_init(autoreset=True)
 class CustomLog(BaseHTTPMiddleware):
     max_client_length = 15
     max_id_length = 8
-    max_message_length = 96
+    max_message_length = 95
 
     def __init__(self, app: ASGIApp, app_logger: Logger, blacklist: tuple[str]):
         super().__init__(app)
