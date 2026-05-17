@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% block title %}Магазины — LyPay{% endblock %}
 
 {% block content %}
@@ -19,6 +19,7 @@
     </div>
 
     <div class="mt-2" style="display:grid; gap:10px;">
+        <a class="btn btn-primary" style="text-decoration: 0" href="/store/settings">Настройки</a>
         <a class="btn btn-primary" style="text-decoration: 0" href="/store/items">Ассортимент</a>
         {% if store.hostID == user.ID %}
         <a class="btn btn-primary" style="text-decoration: 0" href="/store/access">Доступ</a>

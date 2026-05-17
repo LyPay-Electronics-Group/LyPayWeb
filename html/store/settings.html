@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Настройки магазина — LyPay{% endblock %}
+
+{% block head %}
+<style>
+    .fields {
+        display: grid;
+        gap: 10px;
+    }
+
+    .field label {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+    }
+
+    .field input, .field textarea {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 1rem;
+    }
+
+    .field textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .avatar-wrap {
+        display: grid;
+        place-items: center;
+        gap: 10px;
+    }
+
+    .file-input {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Настройки магазина</h2>
+    <div style="color: var(--text-secondary); margin-bottom: 12px;">{{ store.name }} · ID: <strong>{{ store.ID
+        }}</strong></div>
+    {% if message %}<p style="color: var(--success); margin-bottom: 10px;">{{ message }}</p>{% endif %}
+    {% if error %}<p style="color: var(--danger); margin-bottom: 10px;">{{ error }}</p>{% endif %}
+
+    <div class="avatar-wrap" style="margin-bottom: 14px;">
+        <img class="avatar-rect" src="{{ avatar }}" alt="Аватар магазина"/>
+        <form action="/store/settings/avatar" method="post" enctype="multipart/form-data"
+              style="width:100%; display:grid; gap:10px;">
+            <input class="file-input" type="file" name="file" accept="image/*" required>
+            <button class="btn btn-primary" type="submit">Обновить аватар</button>
+        </form>
+    </div>
+
+    <form action="/store/settings/save" method="post" style="display:grid; gap: 12px;">
+        <div class="fields">
+            <div class="field">
+                <label for="name">Название</label>
+                <input id="name" name="name" type="text" value="{{ store.name }}" autocomplete="off" required>
+            </div>
+            <div class="field">
+                <label for="description">Описание</label>
+                <textarea id="description" name="description" autocomplete="off"
+                          required>{{ store.description }}</textarea>
+            </div>
+        </div>
+        <button class="btn btn-success" type="submit">Сохранить</button>
+    </form>
+</div>
+{% endblock %}
