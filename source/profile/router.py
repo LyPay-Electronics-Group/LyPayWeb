@@ -98,31 +98,25 @@ async def upload_avatar(
     user_info = request.session.get("user", None)
     if not user_info:
         return RedirectResponse(url="/login", status_code=303)
-    if file.content_type[:5] != "image":
+
+    if not file.content_type or not file.content_type.startswith("image/"):
         return RedirectResponse(
             url="/profile?error=Прикрепите+картинку",
             status_code=303
         )
+
     user_id = user_info["ID"]
     file_path = AVATAR_DIR / f"tmp_{user_id}.jpg"
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
-    await update_avatar(user_id, str(file_path))
-    file_path.unlink()
+
+    try:
+        await update_avatar(user_id, str(file_path))
+    finally:
+        if file_path.exists():
+            file_path.unlink()
+
     return RedirectResponse(
         url="/profile?message=Аватар+обновлён",
         status_code=303
     )
-
-
-@router.get("/media/users_media/{filename}")
-async def serve_avatar(filename: str, request: Request):
-    user = request.session.get("user", None)
-    if user is None:
-        raise HTTPException(status_code=401, detail="Требуется авторизация")
-
-    file_path = AVATAR_DIR / filename
-    if not file_path.is_file():
-        raise HTTPException(status_code=404, detail="Файл не найден")
-
-    return FileResponse(file_path, media_type="image/jpeg")
