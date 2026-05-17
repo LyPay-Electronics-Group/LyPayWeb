@@ -20,7 +20,9 @@
 
     <div class="mt-2" style="display:grid; gap:10px;">
         <a class="btn btn-primary" style="text-decoration: 0" href="/store/items">Ассортимент</a>
+        {% if store.hostID == user.ID %}
         <a class="btn btn-primary" style="text-decoration: 0" href="/store/access">Доступ</a>
+        {% endif %}
     </div>
 </div>
 {% else %}
