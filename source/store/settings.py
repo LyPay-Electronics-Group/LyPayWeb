@@ -1,8 +1,8 @@
-from pathlib import Path
-
 from fastapi import APIRouter, Request, Depends as D, UploadFile, File, Form, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+
+from pathlib import Path
 
 from scripts.firewall_validator import firewall_validate_factory as FVF
 from scripts.base_context import build_base_context
@@ -11,6 +11,7 @@ from LyPayAPI.store.info import get as get_store, get_by_shopkeeper
 from LyPayAPI.store.settings.name import update as update_name
 from LyPayAPI.store.settings.description import update as update_description
 from LyPayAPI.store.settings.avatar import update as update_avatar, get as get_avatar
+from LyPayAPI.utils.format import clear
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html")
@@ -93,8 +94,8 @@ async def save_settings(
         raise
 
     try:
-        await update_name(store_id, name)
-        await update_description(store_id, description)
+        await update_name(store_id, clear(name))
+        await update_description(store_id, clear(description))
     except Exception as e:
         return RedirectResponse(
             url="/store/settings?error=Не+удалось+сохранить",
