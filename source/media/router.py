@@ -12,6 +12,10 @@ USERS_AVATAR_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.get("/media/stores_media/{filename}")
 async def serve_store_avatar(filename: str, request: Request):
+    user = request.session.get("user", None)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Требуется авторизация")
+
     file_path = STORES_AVATAR_DIR / filename
     if not file_path.is_file():
         raise HTTPException(status_code=404, detail="Файл не найден")

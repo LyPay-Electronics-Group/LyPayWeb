@@ -5,12 +5,17 @@ from starlette.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from os import getenv
+from dotenv import load_dotenv
+
 from source.test import router as test_router
 from source.auth import router as auth_router
 #from source.mst import router as mst_router
 from source.store import router as store_router
 from source.profile import router as profile_router
 from source.media import router as media_router
+
+from source.plug import router as plug_router
 
 from scripts.base_context import build_base_context
 
@@ -19,6 +24,8 @@ from sys import stdout
 from middleware.logger import CustomLog
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import Response
+
+load_dotenv()
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -30,7 +37,7 @@ app.add_middleware(CustomLog, app_logger=logger, blacklist=(
     "/mst/machine/local_stats",
     "/mst/machine/core_stats"
 ))
-app.add_middleware(SessionMiddleware, secret_key="verysecretkey")  # todo:брать из .env
+app.add_middleware(SessionMiddleware, secret_key=getenv("LYPAY_SESSION_KEY"))
 
 app.include_router(test_router)
 app.include_router(auth_router)
@@ -38,6 +45,7 @@ app.include_router(profile_router)
 app.include_router(media_router)
 app.include_router(store_router, prefix="/store")
 #app.include_router(mst_router, prefix='/mst')
+app.include_router(plug_router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
