@@ -21,26 +21,6 @@
         margin-top: 4px;
     }
 
-    .notice {
-        margin-top: 12px;
-        padding: 12px 14px;
-        border-radius: 14px;
-        border: 1px solid var(--border);
-        background: #fff;
-        font-weight: 600;
-    }
-
-    .notice.ok {
-        border-color: rgba(5, 150, 105, 0.25);
-        background: rgba(5, 150, 105, 0.08);
-        color: #065f46;
-    }
-
-    .notice.err {
-        border-color: rgba(220, 38, 38, 0.25);
-        background: rgba(220, 38, 38, 0.08);
-        color: #7f1d1d;
-    }
 
     .file-input {
         width: 100%;
@@ -65,12 +45,8 @@
         </div>
     </div>
 
-    {% if request.query_params.message %}
-    <div class="notice ok">{{ request.query_params.message }}</div>
-    {% endif %}
-    {% if request.query_params.error %}
-    <div class="notice err">{{ request.query_params.error }}</div>
-    {% endif %}
+    {% if message %}<p style="color: var(--success); margin-bottom: 10px;">{{ message }}</p>{% endif %}
+    {% if error %}<p style="color: var(--danger); margin-bottom: 10px;">{{ error }}</p>{% endif %}
 
     <div style="display: grid; gap: 8px; font-size: 0.98rem;">
         {% for key, value in user.items() %}

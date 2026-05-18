@@ -85,6 +85,10 @@ async def profile_page(
             is_shopkeeper = True
     except:
         pass
+
+    message = request.query_params.get("message")
+    error = request.query_params.get("error")
+
     return templates.TemplateResponse(
         "profile/profile.html",
         await build_base_context(
@@ -95,6 +99,8 @@ async def profile_page(
                 "avatar": avatar,
                 "is_self": ID == user_id,
                 "is_shopkeeper": is_shopkeeper,
+                "message": message,
+                "error": error,
             },
         ),
     )
@@ -109,18 +115,19 @@ async def upload_avatar(
     if not user_info:
         return RedirectResponse(url="/login", status_code=303)
 
+    user_id = user_info["ID"]
+
     if not file.content_type or not file.content_type.startswith("image/"):
         return RedirectResponse(
-            url="/profile?error=Прикрепите+картинку",
+            url=f"/profile/{user_id}?error=Прикрепите+картинку",
             status_code=303
         )
     if file.size > AVATAR_MAX_SIZE:
         return RedirectResponse(
-            url="/profile?error=Слишком большой размер файла",
+            url=f"/profile/{user_id}?error=Слишком большой размер файла",
             status_code=303
     )
 
-    user_id = user_info["ID"]
     file_path = AVATAR_DIR / f"tmp_{user_id}.jpg"
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
@@ -132,6 +139,6 @@ async def upload_avatar(
             file_path.unlink()
 
     return RedirectResponse(
-        url="/profile?message=Аватар+обновлён",
+        url=f"/profile/{user_id}?message=Аватар+обновлён",
         status_code=303
     )
