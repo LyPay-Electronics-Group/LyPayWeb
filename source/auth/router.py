@@ -4,8 +4,10 @@ from fastapi.templating import Jinja2Templates
 
 from scripts.base_context import build_base_context
 
+from LyPayAPI.__exceptions__ import BadFireWallCheck
+
 from .utils import authenticate_user, register_user, send_verification_code, verify_code
-from source.errors import is_bad_firewall_error, to_user_message
+from source.errors import to_user_message
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html")
@@ -38,9 +40,12 @@ async def _registration_template(
 
 # --- Страница входа ---
 @router.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request):
+async def login_page(request: Request, redirect: str = None):
     if request.session.get("user"):
+        if redirect == "store":
+            return RedirectResponse(url="/store/register", status_code=303)
         return RedirectResponse(url="/profile", status_code=303)
+    request.session["after_login_redirect"] = redirect
     return templates.TemplateResponse("auth/login.html", await build_base_context(request, hide_header=True))
 
 
@@ -58,6 +63,9 @@ async def login(request: Request, identifier: str = Form(...), password: str = F
             status_code=401,
         )
     request.session["user"] = {"ID": user["ID"], "email": user["email"]}
+
+    if request.session.pop("after_login_redirect", None) == "store":
+        return RedirectResponse(url="/store/register", status_code=303)
     return RedirectResponse(url="/profile", status_code=303)
 
 
@@ -65,6 +73,8 @@ async def login(request: Request, identifier: str = Form(...), password: str = F
 @router.get("/register", response_class=HTMLResponse)
 async def register_page(request: Request):
     if request.session.get("user"):
+        if request.session.pop("after_login_redirect", None) == "store":
+            return RedirectResponse(url="/store/register", status_code=303)
         return RedirectResponse(url="/profile", status_code=303)
 
     code_sent = bool(request.session.get("registration_code_sent", False))
@@ -83,9 +93,10 @@ async def register_send_code(request: Request, email: str = Form(...)):
 
     try:
         corp_record = await send_verification_code(candidate_email)
+    except BadFireWallCheck:
+        request.session.pop("after_login_redirect", None)
+        return RedirectResponse(url="/bad-firewall-status", status_code=303)
     except Exception as e:
-        if is_bad_firewall_error(e):
-            return RedirectResponse(url="/bad-firewall-status", status_code=303)
         return await _registration_template(
             request,
             email=candidate_email,
@@ -129,10 +140,13 @@ async def register_verify(
         user_id = await register_user(email, password, login, name=name, group=group)
         _clear_registration_session(request)
         request.session["user"] = {"ID": user_id}
+
+        if request.session.pop("after_login_redirect", None) == "store":
+            return RedirectResponse(url="/store/register", status_code=303)
         return RedirectResponse(url="/profile", status_code=303)
+    except BadFireWallCheck:
+        return RedirectResponse(url="/bad-firewall-status", status_code=303)
     except Exception as e:
-        if is_bad_firewall_error(e):
-            return RedirectResponse(url="/bad-firewall-status", status_code=303)
         return await _registration_template(
             request,
             email=email,

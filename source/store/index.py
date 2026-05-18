@@ -59,7 +59,6 @@ async def index(
         "store/index.html",
         await build_base_context(
             request,
-            active_tab="stores",
             extra={"store": clean_shop_info,
                    "avatar": avatar_url,
                    "items": items},

@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 
 from scripts.base_context import build_base_context
 
-from LyPayAPI.store.registration import check_link, get_ID, new, send_email
+from LyPayAPI.store.registration import check_link, get_ID, new #, send_email
 from LyPayAPI.store.info import get_all_shopkeepers
 from LyPayAPI.user.info import get
 from source.errors import is_bad_firewall_error, to_user_message
@@ -17,7 +17,7 @@ templates = Jinja2Templates(directory="html")
 async def register_store_page(request: Request):
     user_info = request.session.get("user", None)
     if user_info is None:
-        return RedirectResponse(url="/login", status_code=303)
+        return RedirectResponse(url="/login?redirect=store", status_code=303)
 
     try:
         if user_info["ID"] in await get_all_shopkeepers():
@@ -27,20 +27,20 @@ async def register_store_page(request: Request):
             return RedirectResponse(url="/bad-firewall-status", status_code=303)
         return templates.TemplateResponse(
             "store/register.html",
-            await build_base_context(request, active_tab="stores", extra={"error": to_user_message(e)}),
+            await build_base_context(request, extra={"error": to_user_message(e)}),
             status_code=503,
         )
 
     #await send_email("mandzhiev.ts@students.sch2.ru")  # TEMP
     request.session["store"] = {"registration": True}
-    return templates.TemplateResponse("store/register.html", await build_base_context(request, active_tab="stores"))
+    return templates.TemplateResponse("store/register.html", await build_base_context(request))
 
 
 @router.post("/")
 async def check_store_code(request: Request, code: str = Form(...)):
     user_info = request.session.get("user")
     if user_info is None:
-        return RedirectResponse(url="/login", status_code=303)
+        return RedirectResponse(url="/login?redirect=store", status_code=303)
 
     try:
         ID = user_info["ID"]
@@ -52,7 +52,7 @@ async def check_store_code(request: Request, code: str = Form(...)):
             return RedirectResponse(url="/bad-firewall-status", status_code=303)
         return templates.TemplateResponse(
             "store/register.html",
-            await build_base_context(request, active_tab="stores", extra={"error": to_user_message(e), "user": user_info}),
+            await build_base_context(request, extra={"error": to_user_message(e), "user": user_info}),
             status_code=400,
         )
 
@@ -83,12 +83,12 @@ async def select_store_id_page(request: Request):
             return RedirectResponse(url="/bad-firewall-status", status_code=303)
         return templates.TemplateResponse(
             "store/register.html",
-            await build_base_context(request, active_tab="stores", extra={"error": to_user_message(e)}),
+            await build_base_context(request, extra={"error": to_user_message(e)}),
             status_code=503,
         )
     return templates.TemplateResponse(
         "store/select_id.html",
-        await build_base_context(request, active_tab="stores", extra={"variants": variants}),
+        await build_base_context(request, extra={"variants": variants}),
     )
 
 
@@ -96,7 +96,7 @@ async def select_store_id_page(request: Request):
 async def create_store(request: Request, store_id: str = Form(...), name: str = Form(...)):
     user_info = request.session.get("user")
     if user_info is None:
-        return RedirectResponse(url="/login", status_code=303)
+        return RedirectResponse(url="/login?redirect=store", status_code=303)
     if "store" not in request.session or not request.session["store"].get("registration", False):
         return RedirectResponse(url="/store/register", status_code=303)
     ID = user_info["ID"]

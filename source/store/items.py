@@ -33,7 +33,6 @@ async def items_page(
         "store/items.html",
         await build_base_context(
             request,
-            active_tab="stores",
             extra={
                 "store": await get(current_storeID),
                 "items": [await items.get(item) for item in await items.get_all(current_storeID)],

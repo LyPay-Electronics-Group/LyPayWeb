@@ -49,17 +49,8 @@ async def register_user(
     login = login.strip()
     password = password.strip()
 
-    if not _is_valid_login(login):
-        raise ValueError("Логин содержит недопустимые символы.")
     if len(password) < 6:
         raise ValueError("Пароль слишком короткий (минимум 6 символов).")
-
-    try:
-        await get_by_login(login)
-    except IDNotFound:
-        pass
-    else:
-        raise ValueError("Этот логин уже занят.")
 
     user_id = await new(
         email=email,
@@ -91,12 +82,7 @@ async def authenticate_user(identifier: str, password: str):
 
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-_LOGIN_RE = re.compile(r"^[A-Za-z0-9_.-]{3,32}$")
 
 
 def _is_valid_email(email: str) -> bool:
     return bool(_EMAIL_RE.match(email.strip()))
-
-
-def _is_valid_login(login: str) -> bool:
-    return bool(_LOGIN_RE.match(login.strip()))

@@ -65,7 +65,6 @@ async def settings_page(
         "store/settings.html",
         await build_base_context(
             request,
-            active_tab="stores",
             extra={
                 "store": store,
                 "avatar": avatar_url,

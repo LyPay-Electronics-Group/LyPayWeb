@@ -34,7 +34,6 @@ async def access_page(
         "store/access.html",
         await build_base_context(
             request,
-            active_tab="stores",
             extra={
                 "store": await get(current_storeID),
                 "shopkeepers": [sk for sk in await access.get_list(current_storeID) if sk != user_info["ID"]],

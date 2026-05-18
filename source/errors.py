@@ -16,6 +16,7 @@ from LyPayAPI.__exceptions__ import (
     RegistrationEmailNotFound,
     SubZeroInput,
     UserIsAlreadyAShopkeeper,
+    LauncherFlagBlocked
 )
 
 
@@ -60,6 +61,9 @@ def to_user_message(exc: Exception) -> str:
 
     if isinstance(exc, (NotEnoughBalance, SubZeroInput)):
         return "Некорректная операция."
+
+    if isinstance(exc, LauncherFlagBlocked):
+        return "Сейчас это действие недоступно."
 
     if isinstance(exc, APIError):
         return "Ошибка сервиса. Попробуйте позже."
