@@ -132,7 +132,7 @@ async def upload_store_avatar(
         )
     if file.size > AVATAR_MAX_SIZE:
         return RedirectResponse(
-            url="/profile?error=Слишком большой размер файла",
+            url="/store/settings?error=Слишком большой размер файла",
             status_code=303
         )
 
