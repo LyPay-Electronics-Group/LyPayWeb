@@ -3,15 +3,20 @@
 
 {% block content %}
 <div class="card" style="max-width: 440px; margin: 2rem auto;">
-    <h2 class="text-center">Регистрация</h2>
+    <h2 class="text-center">Гостевая регистрация</h2>
 
     {% if error %}
     <p style="color: var(--danger); margin-top: 10px;">{{ error }}</p>
     {% endif %}
 
     {% if not code_sent %}
-    <form method="post" action="/register/send-code" class="mt-2">
+
+    <form method="post" action="/register_guest/send-code" class="mt-2">
         <div style="margin-bottom: 1rem;">
+            <p>
+                Найдите того, у кого есть корпоративная почта: Ваш друг из Л2Ш, сын/дочь, любой организатор.<br>
+                Впишите его/её почту в поле ниже.
+            </p><br><br>
             <label>Email</label><br>
             <input type="email" name="email" required value="{{ email }}"
                    style="width:100%; padding:0.7rem; border:1px solid var(--border); border-radius:10px;">
@@ -19,7 +24,7 @@
         <button type="submit" class="btn btn-primary">Отправить код подтверждения</button>
     </form>
     {% else %}
-    <form method="post" action="/register/verify" class="mt-2">
+    <form method="post" action="/register_guest/verify" class="mt-2">
         <p style="margin-bottom: 10px;">Код отправлен на <strong>{{ email }}</strong></p>
 
         <div style="margin-bottom: 1rem;">
@@ -44,15 +49,18 @@
                    style="width:100%; padding:0.7rem; border:1px solid var(--border); border-radius:10px;">
         </div>
 
+        <div style="margin-bottom: 1.25rem;">
+            <label>Ваше имя и фамилия</label><br>
+            <input type="text" name="name" required
+                   style="width:100%; padding:0.7rem; border:1px solid var(--border); border-radius:10px;">
+        </div>
+
         <button type="submit" class="btn btn-primary" style="width:100%;">Зарегистрироваться</button>
     </form>
     {% endif %}
 
     <p class="mt-2 text-center" style="font-size:0.9rem;">
         Уже есть аккаунт? <a href="/login">Войти</a>
-    </p>
-    <p class="mt-2 text-center" style="font-size:0.9rem;">
-        Нет корпоративной почты? <a href="/register_guest/">Зарегистрироваться как гость</a>
     </p>
 </div>
 {% endblock %}
