@@ -15,13 +15,17 @@
 
     <div style="display: grid; gap: 8px; font-size: 0.98rem;">
         {% for key, value in store.items() %}
-        {% if key not in ["Название", "ID"] %}
+        {% if key not in ["Название", "ID", "Владелец"] %}
         <div style="display:flex; justify-content:space-between; gap:10px;">
             <strong style="flex: 0 0 auto;">{{ key }}</strong>
             <span style="flex: 1 1 auto; text-align:right; color: var(--text-secondary); overflow:hidden; text-overflow:ellipsis;">{{ value }}</span>
         </div>
         {% endif %}
         {% endfor %}
+        <div style="display:flex; justify-content:space-between; gap:10px;">
+            <strong style="flex: 0 0 auto;">Владелец</strong>
+            <a href="/profile/{{ store.get('Владелец') }}">{{ store.get('Владелец') }}</a>
+        </div>
     </div>
 
     <div class="mt-2" style="display:grid; gap:10px;">
