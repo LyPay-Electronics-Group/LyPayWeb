@@ -19,6 +19,8 @@ templates = Jinja2Templates(directory="html")
 AVATAR_DIR = Path("media/stores_media")
 AVATAR_DIR.mkdir(parents=True, exist_ok=True)
 
+AVATAR_MAX_SIZE = 5 * 1024 * 1024
+
 
 async def _require_host_store(request: Request) -> tuple[dict, str, dict]:
     user_info = request.session.get("user")
@@ -127,6 +129,11 @@ async def upload_store_avatar(
         return RedirectResponse(
             url="/store/settings?error=Прикрепите+картинку",
             status_code=303,
+        )
+    if file.size > AVATAR_MAX_SIZE:
+        return RedirectResponse(
+            url="/profile?error=Слишком большой размер файла",
+            status_code=303
         )
 
     file_path = AVATAR_DIR / f"tmp_{store_id}.jpg"

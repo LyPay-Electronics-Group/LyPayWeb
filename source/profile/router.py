@@ -19,11 +19,13 @@ templates = Jinja2Templates(directory="html")
 AVATAR_DIR = Path("media/users_media")
 AVATAR_DIR.mkdir(parents=True, exist_ok=True)
 
+AVATAR_MAX_SIZE = 5 * 1024 * 1024
+
 
 @router.get("/profile", response_class=HTMLResponse)
 async def profile_page_redirect(
         request: Request,
-        firewall_ok = D(FVF('main'))
+        firewall_ok=D(FVF('main'))
 ):
     if not firewall_ok:
         return RedirectResponse(url="/bad-firewall-status", status_code=303)
@@ -39,7 +41,7 @@ async def profile_page_redirect(
 async def profile_page(
         ID: int,
         request: Request,
-        firewall_ok = D(FVF('main'))
+        firewall_ok=D(FVF('main'))
 ):
     if not firewall_ok:
         return RedirectResponse(url="/bad-firewall-status", status_code=303)
@@ -58,11 +60,11 @@ async def profile_page(
         return HTMLResponse(content=f"Ошибка: {str(e)}", status_code=500)
 
     clean_user_info = {
-        "ID":     requested_profile["ID"],
-        "Логин":  requested_profile["login"],
-        "Имя":    requested_profile["name"],
+        "ID": requested_profile["ID"],
+        "Логин": requested_profile["login"],
+        "Имя": requested_profile["name"],
         "Группа": requested_profile["group"],
-        "Почта":  requested_profile["email"]
+        "Почта": requested_profile["email"]
     }
     if ID == user_id:
         clean_user_info["Баланс"] = user_info["balance"]
@@ -112,6 +114,11 @@ async def upload_avatar(
             url="/profile?error=Прикрепите+картинку",
             status_code=303
         )
+    if file.size > AVATAR_MAX_SIZE:
+        return RedirectResponse(
+            url="/profile?error=Слишком большой размер файла",
+            status_code=303
+    )
 
     user_id = user_info["ID"]
     file_path = AVATAR_DIR / f"tmp_{user_id}.jpg"
