@@ -52,7 +52,7 @@ async def settings_page(
         api_answer = await get_avatar(store_id)
         if api_answer is not None:
             avatar_path, _ = api_answer
-            avatar_url = f"/store/settings/media/{Path(str(avatar_path)).name}"
+            avatar_url = '/' + avatar_path
         else:
             raise Exception
     except Exception:
