@@ -24,6 +24,6 @@ async def store(request: Request):
     return await base(request)
 
 
-@router.get("/transfer", response_class=HTMLResponse)
+@router.get("/card", response_class=HTMLResponse)
 async def transfer(request: Request):
     return await base(request)
