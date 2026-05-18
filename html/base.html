@@ -308,7 +308,7 @@
             </div>
             <div class="header-actions">
                 {% block balance %}
-                <a class="balance-pill" href="/balance/to_transfer" aria-label="Перейти к пополнению баланса">
+                <a class="balance-pill" href="/card" aria-label="Перейти к пополнению баланса">
                     <span class="balance-amount">{{ balance|default("—") }}</span>
                     <span class="balance-add" aria-hidden="true">+</span>
                 </a>
@@ -352,7 +352,7 @@
                 </svg>
                 Магазины
             </a>
-            <a href="/transfer" class="{% if active_tab=='transfer' %}active{% endif %}" aria-label="Карта">
+            <a href="/card" class="{% if active_tab=='transfer' %}active{% endif %}" aria-label="Карта">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <rect x="2" y="4" width="20" height="16" rx="2"/>
