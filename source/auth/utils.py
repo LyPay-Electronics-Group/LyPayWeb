@@ -2,7 +2,7 @@ import re
 
 from LyPayAPI.user.registration import check_email_record, send_email, new, check_code
 from LyPayAPI.user.info import get_by_email, get_by_login
-from LyPayAPI.__exceptions__ import APIError, EmailNotFound, IDNotFound
+from LyPayAPI.__exceptions__ import APIError, EmailNotFound, IDNotFound, LoginNotFound
 
 
 async def send_verification_code(email: str):
@@ -56,6 +56,13 @@ async def register_user(
     """
     login = login.strip()
     password = password.strip()
+
+    try:
+        await get_by_login(email)
+    except LoginNotFound:
+        pass
+    else:
+        raise ValueError("Этот логин уже зарегистрирован.")
 
     if len(password) < 6:
         raise ValueError("Пароль слишком короткий (минимум 6 символов).")
