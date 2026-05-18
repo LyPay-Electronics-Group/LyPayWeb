@@ -19,7 +19,7 @@ async def base(request: Request):
     )
 
 
-@router.get("/store", response_class=HTMLResponse)
+@router.get("/stores", response_class=HTMLResponse)
 async def store(request: Request):
     return await base(request)
 
