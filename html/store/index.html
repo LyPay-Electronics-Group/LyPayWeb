@@ -15,7 +15,7 @@
 
     <div style="display: grid; gap: 8px; font-size: 0.98rem;">
         {% for key, value in store.items() %}
-        {% if key not in ["items"] %}
+        {% if key not in ["Название", "ID"] %}
         <div style="display:flex; justify-content:space-between; gap:10px;">
             <strong style="flex: 0 0 auto;">{{ key }}</strong>
             <span style="flex: 1 1 auto; text-align:right; color: var(--text-secondary); overflow:hidden; text-overflow:ellipsis;">{{ value }}</span>
@@ -26,12 +26,30 @@
 
     <div class="mt-2" style="display:grid; gap:10px;">
         <a class="btn btn-primary" style="text-decoration: 0" href="/store/settings">Настройки</a>
-        <a class="btn btn-primary" style="text-decoration: 0" href="/store/items">Ассортимент</a>
         {% if store.get("Владелец") == user.ID %}
         <a class="btn btn-primary" style="text-decoration: 0" href="/store/access">Доступ</a>
         {% endif %}
     </div>
 </div>
+<div class="card" style="margin-top: 20px;">
+    <h3>Товары магазина</h3>
+    {% if items %}
+    <div style="display: grid; gap: 12px;">
+        {% for item_id, item in items.items() %}
+        <div style="border: 1px solid #ccc; padding: 10px; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong>{{ item.name }}</strong>
+                <span style="color: var(--text-secondary);">{{ item.price }} ₽</span>
+            </div>
+        </div>
+        {% endfor %}
+        <a class="btn btn-primary" style="text-decoration: 0" href="/store/items">Ассортимент</a>
+    </div>
+    {% else %}
+    <p style="color: var(--text-secondary);">Нет товаров</p>
+    {% endif %}
+</div>
+
 {% else %}
 <div class="card">
     <h2>Магазин не найден</h2>

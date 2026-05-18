@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from LyPayAPI.store.info import get, get_by_shopkeeper
-from LyPayAPI.store.items import get_all
+from LyPayAPI.store.items import get_all, get as get_item
 from LyPayAPI.store.settings.avatar import get as get_avatar
 from scripts.base_context import build_base_context
 from scripts.firewall_validator import firewall_validate_factory as FVF
@@ -49,10 +49,13 @@ async def index(
         avatar_url = "/static/skill_issue.jpg"
 
     try:
-        items = await get_all(store_id)
+        items_id = await get_all(store_id)
+        items = {}
+        for item_id in items_id:
+            items[item_id] = await get_item(item_id)
     except Exception as e:
         return HTMLResponse(content=f"Ошибка: {str(e)}", status_code=500)
-
+    print(items)
     return templates.TemplateResponse(
         "store/index.html",
         await build_base_context(
