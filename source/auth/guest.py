@@ -6,7 +6,7 @@ from scripts.base_context import build_base_context
 
 from LyPayAPI.__exceptions__ import BadFireWallCheck
 
-from .utils import authenticate_user, register_user, send_verification_code, verify_code
+from .utils import register_user, send_verification_code_guest, verify_code
 from source.errors import to_user_message
 
 router = APIRouter()
@@ -28,7 +28,7 @@ async def _registration_template(
     status_code: int = 200,
 ):
     return templates.TemplateResponse(
-        "auth/register.html",
+        "auth/register_guest.html",
         await build_base_context(
             request,
             hide_header=True,
@@ -38,39 +38,7 @@ async def _registration_template(
     )
 
 
-# --- Страница входа ---
-@router.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request, redirect: str = None):
-    if request.session.get("user"):
-        if redirect == "store":
-            return RedirectResponse(url="/store/register", status_code=303)
-        return RedirectResponse(url="/profile", status_code=303)
-    request.session["after_login_redirect"] = redirect
-    return templates.TemplateResponse("auth/login.html", await build_base_context(request, hide_header=True))
-
-
-@router.post("/login")
-async def login(request: Request, identifier: str = Form(...), password: str = Form(...)):
-    user = await authenticate_user(identifier.strip(), password)
-    if not user:
-        return templates.TemplateResponse(
-            "auth/login.html",
-            await build_base_context(
-                request,
-                hide_header=True,
-                extra={"error": "Неверный логин/email или пароль."},
-            ),
-            status_code=401,
-        )
-    request.session["user"] = {"ID": user["ID"], "email": user["email"]}
-
-    if request.session.pop("after_login_redirect", None) == "store":
-        return RedirectResponse(url="/store/register", status_code=303)
-    return RedirectResponse(url="/profile", status_code=303)
-
-
-# --- Страница регистрации ---
-@router.get("/register", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def register_page(request: Request):
     if request.session.get("user"):
         if request.session.pop("after_login_redirect", None) == "store":
@@ -86,13 +54,13 @@ async def register_page(request: Request):
     return await _registration_template(request, email=email, code_sent=code_sent)
 
 
-@router.post("/register/send-code")
+@router.post("/send-code")
 async def register_send_code(request: Request, email: str = Form(...)):
     candidate_email = email.strip()
     _clear_registration_session(request)
 
     try:
-        corp_record = await send_verification_code(candidate_email)
+        await send_verification_code_guest(candidate_email)
     except BadFireWallCheck:
         request.session.pop("after_login_redirect", None)
         return RedirectResponse(url="/bad-firewall-status", status_code=303)
@@ -107,37 +75,32 @@ async def register_send_code(request: Request, email: str = Form(...)):
 
     request.session["registration_email"] = candidate_email
     request.session["registration_code_sent"] = True
-    request.session["registration_corp_record"] = {
-        "name": corp_record.get("name"),
-        "group": corp_record.get("group"),
-    }
-    return RedirectResponse(url="/register", status_code=303)
+    return RedirectResponse(url="/register_guest", status_code=303)
 
 
-@router.post("/register/verify")
+@router.post("/verify")
 async def register_verify(
     request: Request,
     code: str = Form(...),
     password: str = Form(...),
     login: str = Form(...),
+    name: str = Form(...)
 ):
     email = request.session.get("registration_email")
     code_sent = bool(request.session.get("registration_code_sent", False))
     if not email or not code_sent:
         _clear_registration_session(request)
-        return RedirectResponse(url="/register", status_code=303)
+        return RedirectResponse(url="/register_guest", status_code=303)
 
     try:
-        if not await verify_code(email, code):
+        if not await verify_code(email, code, "guest"):
             raise ValueError("Неверный код.")
 
-        corp_record = request.session.get("registration_corp_record") or {}
-        name = corp_record.get("name")
-        group = corp_record.get("group")
-        if not name or not group:
-            raise ValueError("Данные для регистрации не найдены. Попробуйте отправить код ещё раз.")
+        group = "гость"
+        if not name:
+            raise ValueError("Недостаточно данных для регистрации. Попробуйте заполнить форму заново.")
 
-        user_id = await register_user(email, password, login, name=name, group=group)
+        user_id = await register_user(email, password, login, name=name, group=group, owner_flag="web_guest")
         _clear_registration_session(request)
         request.session["user"] = {"ID": user_id}
 
@@ -154,10 +117,3 @@ async def register_verify(
             error=to_user_message(e),
             status_code=400,
         )
-
-
-# --- Выход ---
-@router.get("/logout")
-async def logout(request: Request):
-    request.session.pop("user", None)
-    return RedirectResponse(url="/login", status_code=303)

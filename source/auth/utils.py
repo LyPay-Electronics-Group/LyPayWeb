@@ -26,12 +26,19 @@ async def send_verification_code(email: str):
     return corp_record
 
 
-async def verify_code(email: str, code: str) -> bool:
+async def send_verification_code_guest(email: str):
+    if not _is_valid_email(email):
+        raise ValueError("Некорректный email.")
+
+    await send_email(route="guest", participant=email)
+
+
+async def verify_code(email: str, code: str, route: str = 'main') -> bool:
     """
     Проверяет код подтверждения для указанного email.
     """
     try:
-        return await check_code(email, code)
+        return await check_code(email, code, route)
     except APIError:
         return False
 
@@ -41,7 +48,8 @@ async def register_user(
         password: str,
         login: str,
         name: str,
-        group: str
+        group: str,
+        owner_flag: str = "web_owner"
 ):
     """
     Регистрирует нового пользователя через LyPayAPI и возвращает ID созданного пользователя.
@@ -58,7 +66,7 @@ async def register_user(
         password=password,
         name=name,
         group=group,
-        owner_flag="web_owner",
+        owner_flag=owner_flag,
     )
     return user_id
 

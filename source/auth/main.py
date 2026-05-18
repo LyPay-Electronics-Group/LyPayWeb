@@ -1,0 +1,124 @@
+from fastapi import APIRouter, Request, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+
+from scripts.base_context import build_base_context
+
+from LyPayAPI.__exceptions__ import BadFireWallCheck
+
+from .utils import register_user, send_verification_code, verify_code
+from source.errors import to_user_message
+
+router = APIRouter()
+templates = Jinja2Templates(directory="html")
+
+
+def _clear_registration_session(request: Request) -> None:
+    request.session.pop("registration_email", None)
+    request.session.pop("registration_code_sent", None)
+    request.session.pop("registration_corp_record", None)
+
+
+async def _registration_template(
+    request: Request,
+    *,
+    email: str = "",
+    code_sent: bool = False,
+    error: str | None = None,
+    status_code: int = 200,
+):
+    return templates.TemplateResponse(
+        "auth/register.html",
+        await build_base_context(
+            request,
+            hide_header=True,
+            extra={"code_sent": code_sent, "email": email, "error": error},
+        ),
+        status_code=status_code,
+    )
+
+
+@router.get("/", response_class=HTMLResponse)
+async def register_page(request: Request):
+    if request.session.get("user"):
+        if request.session.pop("after_login_redirect", None) == "store":
+            return RedirectResponse(url="/store/register", status_code=303)
+        return RedirectResponse(url="/profile", status_code=303)
+
+    code_sent = bool(request.session.get("registration_code_sent", False))
+    email = request.session.get("registration_email", "")
+    if code_sent and not email:
+        _clear_registration_session(request)
+        code_sent = False
+
+    return await _registration_template(request, email=email, code_sent=code_sent)
+
+
+@router.post("/send-code")
+async def register_send_code(request: Request, email: str = Form(...)):
+    candidate_email = email.strip()
+    _clear_registration_session(request)
+
+    try:
+        corp_record = await send_verification_code(candidate_email)
+    except BadFireWallCheck:
+        request.session.pop("after_login_redirect", None)
+        return RedirectResponse(url="/bad-firewall-status", status_code=303)
+    except Exception as e:
+        return await _registration_template(
+            request,
+            email=candidate_email,
+            code_sent=False,
+            error=to_user_message(e),
+            status_code=400,
+        )
+
+    request.session["registration_email"] = candidate_email
+    request.session["registration_code_sent"] = True
+    request.session["registration_corp_record"] = {
+        "name": corp_record.get("name"),
+        "group": corp_record.get("group"),
+    }
+    return RedirectResponse(url="/register", status_code=303)
+
+
+@router.post("/verify")
+async def register_verify(
+    request: Request,
+    code: str = Form(...),
+    password: str = Form(...),
+    login: str = Form(...),
+):
+    email = request.session.get("registration_email")
+    code_sent = bool(request.session.get("registration_code_sent", False))
+    if not email or not code_sent:
+        _clear_registration_session(request)
+        return RedirectResponse(url="/register", status_code=303)
+
+    try:
+        if not await verify_code(email, code):
+            raise ValueError("Неверный код.")
+
+        corp_record = request.session.get("registration_corp_record") or {}
+        name = corp_record.get("name")
+        group = corp_record.get("group")
+        if not name or not group:
+            raise ValueError("Данные для регистрации не найдены. Попробуйте отправить код ещё раз.")
+
+        user_id = await register_user(email, password, login, name=name, group=group)
+        _clear_registration_session(request)
+        request.session["user"] = {"ID": user_id}
+
+        if request.session.pop("after_login_redirect", None) == "store":
+            return RedirectResponse(url="/store/register", status_code=303)
+        return RedirectResponse(url="/profile", status_code=303)
+    except BadFireWallCheck:
+        return RedirectResponse(url="/bad-firewall-status", status_code=303)
+    except Exception as e:
+        return await _registration_template(
+            request,
+            email=email,
+            code_sent=True,
+            error=to_user_message(e),
+            status_code=400,
+        )
