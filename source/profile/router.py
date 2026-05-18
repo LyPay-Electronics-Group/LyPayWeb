@@ -77,11 +77,12 @@ async def profile_page(
     except Exception as e:
         avatar = "/static/skill_issue.jpg"
 
+    is_shopkeeper = False
     try:
         if await get_by_shopkeeper(user_id):
             is_shopkeeper = True
-    except Exception as e:
-        is_shopkeeper = False
+    except:
+        pass
     return templates.TemplateResponse(
         "profile/profile.html",
         await build_base_context(
