@@ -58,7 +58,7 @@ async def settings_page(
         else:
             raise Exception
     except Exception:
-        avatar_url = "/static/skill_issue.jpg"
+        avatar_url = "/static/qingque.jpg"
 
     message = request.query_params.get("message")
     error = request.query_params.get("error")

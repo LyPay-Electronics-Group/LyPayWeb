@@ -46,7 +46,7 @@ async def index(
         else:
             raise Exception
     except Exception:
-        avatar_url = "/static/skill_issue.jpg"
+        avatar_url = "/static/qingque.jpg"
 
     try:
         items_id = await get_all(store_id)

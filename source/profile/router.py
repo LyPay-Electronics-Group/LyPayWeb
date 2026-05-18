@@ -77,7 +77,7 @@ async def profile_page(
         else:
             raise Exception
     except Exception as e:
-        avatar = "/static/skill_issue.jpg"
+        avatar = "/static/qingque.jpg"
 
     is_shopkeeper = False
     try:

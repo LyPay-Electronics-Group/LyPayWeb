@@ -45,7 +45,7 @@ async def build_base_context(
         else:
             raise Exception
     except Exception as e:
-        ctx["my_avatar"] = "/static/skill_issue.jpg"
+        ctx["my_avatar"] = "/static/qingque.jpg"
 
     if extra:
         ctx.update(extra)
