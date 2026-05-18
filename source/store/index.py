@@ -55,7 +55,6 @@ async def index(
             items[item_id] = await get_item(item_id)
     except Exception as e:
         return HTMLResponse(content=f"Ошибка: {str(e)}", status_code=500)
-    print(items)
     return templates.TemplateResponse(
         "store/index.html",
         await build_base_context(

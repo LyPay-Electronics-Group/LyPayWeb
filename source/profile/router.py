@@ -9,6 +9,7 @@ from scripts.firewall_validator import firewall_validate_factory as FVF
 
 from LyPayAPI.user.info import get
 from LyPayAPI.user.settings.avatar import update as update_avatar, get as get_avatar
+from LyPayAPI.store.info import get_by_shopkeeper
 from LyPayAPI.__exceptions__ import IDNotFound
 from scripts.base_context import build_base_context
 
@@ -76,6 +77,11 @@ async def profile_page(
     except Exception as e:
         avatar = "/static/skill_issue.jpg"
 
+    try:
+        if await get_by_shopkeeper(user_id):
+            is_shopkeeper = True
+    except Exception as e:
+        is_shopkeeper = False
     return templates.TemplateResponse(
         "profile/profile.html",
         await build_base_context(
@@ -85,6 +91,7 @@ async def profile_page(
                 "user": clean_user_info,
                 "avatar": avatar,
                 "is_self": ID == user_id,
+                "is_shopkeeper": is_shopkeeper,
             },
         ),
     )

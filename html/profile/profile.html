@@ -90,6 +90,11 @@
             <button class="btn btn-primary" type="submit">Обновить аватар</button>
         </form>
     </div>
+    {% if is_shopkeeper %}
+    <div class="mt-2" style="display:grid; gap:10px;">
+        <a class="btn btn-primary" style="text-decoration: 0" href="/store">Перейти в магазин</a>
+    </div>
+    {% endif %}
     {% endif %}
 </div>
 {% endblock %}
