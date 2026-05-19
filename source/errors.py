@@ -59,8 +59,11 @@ def to_user_message(exc: Exception) -> str:
     if isinstance(exc, (DBReturnedAVoid, NoPythonProcessesFound, MediaNotFound)):
         return "Внутренняя ошибка сервиса. Попробуйте позже."
 
-    if isinstance(exc, (NotEnoughBalance, SubZeroInput)):
+    if isinstance(exc, SubZeroInput):
         return "Некорректная операция."
+
+    if isinstance(exc, NotEnoughBalance):
+        return "На счёте не достаточно средств для оплаты."
 
     if isinstance(exc, LauncherFlagBlocked):
         return "Сейчас это действие недоступно."

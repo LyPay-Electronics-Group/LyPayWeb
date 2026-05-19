@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}FPS — LyPay{% endblock %}
+{% block page_title %}FPS{% endblock %}
+
+{% block content %}
+<p>
+FPS : {{ ID }}
+</p>
+
+<p><strong>Автор линка</strong>: {{ data.author }}</p>
+<p><strong>Описание</strong>: {{ data.description }}</p>
+<p><strong>Сумма к оплате</strong>: {{ data.amount }} Тгр.</p>
+
+{% if error %}
+<p style="color: var(--danger); margin-top: 10px;">{{ error }}</p>
+{% endif %}
+
+{% if data.payed %}
+<p>Этот линк оплачен.</p>
+{% else %}
+<form method="post" action="/fps/{{ ID }}/pay" class="mt-2">
+    <button type="submit" class="btn btn-primary" style="width:100%;">Оплатить</button>
+</form>
+{% endif %}
+{% endblock %}

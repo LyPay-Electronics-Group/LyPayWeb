@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}FPS — LyPay{% endblock %}
+{% block page_title %}FPS{% endblock %}
+
+{% block content %}
+<p>
+FPS index
+</p>
+
+{% if message %}<p style="color: var(--success); margin-bottom: 10px;">{{ message }}</p>{% endif %}
+
+<form method="post" action="/fps" class="mt-2">
+    <label>ID</label><br>
+    <input name="ID" type="text" required autocomplete="off">
+    <button type="submit" class="btn btn-primary" style="width:100%;">Открыть страницу линка</button>
+</form>
+{% endblock %}
