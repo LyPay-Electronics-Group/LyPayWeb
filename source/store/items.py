@@ -7,7 +7,7 @@ from scripts.firewall_validator import firewall_validate_factory as FVF
 from LyPayAPI.store.info import get, get_by_shopkeeper
 from LyPayAPI.store import items
 from LyPayAPI.utils.format import clear
-from LyPayAPI.__exceptions__ import IDNotFound, UserIsAlreadyAShopkeeper
+from LyPayAPI.__exceptions__ import IDNotFound, UserIsAlreadyAShopkeeper, InvalidStoreItemName
 
 from scripts.base_context import build_base_context
 
@@ -119,5 +119,5 @@ async def add(
     try:
         await items.add(current_storeID, clear(name), price)
         return RedirectResponse("/store/items/", status_code=303)
-    except IDNotFound, UserIsAlreadyAShopkeeper:
+    except IDNotFound, UserIsAlreadyAShopkeeper, InvalidStoreItemName:
         return JSONResponse({"error": True}, status_code=403)
