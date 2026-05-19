@@ -4,9 +4,10 @@ from fastapi.templating import Jinja2Templates
 
 from scripts.base_context import build_base_context
 
-from LyPayAPI.store.registration import check_link, get_ID, new #, send_email
+from LyPayAPI.store.registration import check_link, get_ID, new
 from LyPayAPI.store.info import get_all_shopkeepers
 from LyPayAPI.user.info import get
+from LyPayAPI.utils.format import clear
 from source.errors import is_bad_firewall_error, to_user_message
 
 router = APIRouter()
@@ -31,7 +32,6 @@ async def register_store_page(request: Request):
             status_code=503,
         )
 
-    #await send_email("mandzhiev.ts@students.sch2.ru")  # TEMP
     request.session["store"] = {"registration": True}
     return templates.TemplateResponse("store/register.html", await build_base_context(request))
 
@@ -106,7 +106,7 @@ async def create_store(request: Request, store_id: str = Form(...), name: str = 
         await new(
             storeID=store_id,
             email=email,
-            name=name,
+            name=clear(name),
             hostID=ID,
         )
     except Exception as e:
