@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}FPS — LyPay{% endblock %}
+{% block page_title %}FPS{% endblock %}
+
+{% block content %}
+<p>
+FPS : {{ ID }}
+</p>
+{% if payed %}<p style="color: var(--success); margin-bottom: 10px;">Линк оплачен!</p>{% endif %}
+<form>
+    <button type="submit" class="btn btn-primary" style="width:100%;">Оплатить</button>
+</form>
+{% endblock %}
