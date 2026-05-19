@@ -49,7 +49,7 @@ async def redirect_to_pay_page(
         return RedirectResponse(url="/login", status_code=303)
 
     try:
-        valid = status(ID)
+        valid = await status(ID)
         if valid is not None:
             return RedirectResponse(
                 url=f"/fps/{ID}",
@@ -80,17 +80,24 @@ async def fps_pay_page(
     if not user_info:
         return RedirectResponse(url="/login", status_code=303)
 
-    return templates.TemplateResponse(
-        "fps/fps.html",
-        await build_base_context(
-            request,
-            extra={
-                "ID": ID,
-                "data": await status(ID),
-                "payed": payed == ""
-            }
-        ),
-    )
+    try:
+        status_data = await status(ID)
+        return templates.TemplateResponse(
+            "fps/fps.html",
+            await build_base_context(
+                request,
+                extra={
+                    "ID": ID,
+                    "data": status_data,
+                    "payed": payed == ""
+                }
+            ),
+        )
+    except IDNotFound:
+        return RedirectResponse(
+            url="/fps?message=FPS-линк+с+таким+ID+не+найден!",
+            status_code=303
+        )
 
 
 @router.post("/fps/{ID}")

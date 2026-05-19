@@ -6,8 +6,20 @@
 <p>
 FPS : {{ ID }}
 </p>
-{% if payed %}<p style="color: var(--success); margin-bottom: 10px;">Линк оплачен!</p>{% endif %}
-<form>
+
+<p><strong>Автор линка</strong>: {{ data.author }}</p>
+<p><strong>Описание</strong>: {{ data.description }}</p>
+<p><strong>Сумма к оплате</strong>: {{ data.amount }} Тгр.</p>
+
+{% if error %}
+<p style="color: var(--danger); margin-top: 10px;">{{ error }}</p>
+{% endif %}
+
+{% if payed %}
+<p style="color: var(--success); margin-bottom: 10px;">Линк оплачен!</p>
+{% endif %}
+
+<form method="post" action="/fps/{{ ID }}" class="mt-2">
     <button type="submit" class="btn btn-primary" style="width:100%;">Оплатить</button>
 </form>
 {% endblock %}
