@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from LyPayAPI.fps import status, pay
-from LyPayAPI.__exceptions__ import IDNotFound, NotEnoughBalance
+from LyPayAPI.__exceptions__ import IDNotFound
 
 from scripts.firewall_validator import firewall_validate_factory as FVF
 from scripts.base_context import build_base_context
@@ -49,28 +49,25 @@ async def redirect_to_pay_page(
         return RedirectResponse(url="/login", status_code=303)
 
     try:
+        ID = ID.strip().lower()
         valid = await status(ID)
         if valid is not None:
             return RedirectResponse(
                 url=f"/fps/{ID}",
                 status_code=303
             )
-        return RedirectResponse(
-            url="/fps?message=FPS-линк+с+таким+ID+не+найден!",
-            status_code=303
-        )
-    except IDNotFound:
-        return RedirectResponse(
-            url="/fps?message=FPS-линк+с+таким+ID+не+найден!",
-            status_code=303
-        )
+    except:
+        pass
+    return RedirectResponse(
+        url="/fps?message=FPS-линк+с+таким+ID+не+найден!",
+        status_code=303
+    )
 
 
 @router.get("/fps/{ID}")
 async def fps_pay_page(
         request: Request,
         ID: str,
-        payed: str = None,
         firewall_ok=D(FVF('main'))
 ):
     if not firewall_ok:
@@ -81,15 +78,13 @@ async def fps_pay_page(
         return RedirectResponse(url="/login", status_code=303)
 
     try:
-        status_data = await status(ID)
         return templates.TemplateResponse(
             "fps/fps.html",
             await build_base_context(
                 request,
                 extra={
                     "ID": ID,
-                    "data": status_data,
-                    "payed": payed == ""
+                    "data": await status(ID)
                 }
             ),
         )
@@ -100,7 +95,7 @@ async def fps_pay_page(
         )
 
 
-@router.post("/fps/{ID}")
+@router.post("/fps/{ID}/pay")
 async def fps_pay(
         request: Request,
         ID: str,
@@ -115,11 +110,10 @@ async def fps_pay(
 
     try:
         link_status = await status(ID)
-        if link_status["payed"] is not None:
-            return RedirectResponse(url=f"/fps/{ID}?message=Этот+линк+уже+оплачен", status_code=303)
-
-        await pay(ID, user_info["ID"])
-        return RedirectResponse(url=f"/fps/{ID}?payed", status_code=303)
+        print(link_status)
+        if link_status["payed"] is None:
+            await pay(ID, user_info["ID"])
+        return RedirectResponse(url=f"/fps/{ID}", status_code=303)
     except Exception as e:
         return templates.TemplateResponse(
             "fps/fps.html",
