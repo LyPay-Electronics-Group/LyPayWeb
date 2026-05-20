@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from LyPayAPI.store.info import get, get_by_shopkeeper
 from LyPayAPI.store.items import get_all, get as get_item
 from LyPayAPI.store.settings.avatar import get as get_avatar
+from LyPayAPI.utils.settings import get as get_core_setting
 from scripts.base_context import build_base_context
 from scripts.firewall_validator import firewall_validate_factory as FVF
 
@@ -37,6 +38,9 @@ async def index(
         "Владелец": store_info["hostID"],
         "Баланс": store_info["balance"],
     }
+    if await get_core_setting("store_show_placement_data"):
+        clean_shop_info["Номер парты"] = store_info["placeID"]
+        clean_shop_info["ID на аукционе"] = store_info["auctionID"]
 
     try:
         api_answer = await get_avatar(store_id)
