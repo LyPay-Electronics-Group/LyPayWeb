@@ -21,7 +21,7 @@ async def register_store_page(request: Request):
 
     try:
         if user_info["ID"] in await get_all_shopkeepers():
-            return RedirectResponse(url="/store", status_code=303)
+            return RedirectResponse(url="/store/", status_code=303)
     except Exception as e:
         if is_bad_firewall_error(e):
             return RedirectResponse(url="/bad-firewall-status", status_code=303)
@@ -137,4 +137,4 @@ async def create_store(request: Request, store_id: str = Form(...), name: str = 
         )
 
     request.session.pop("store", None)
-    return RedirectResponse(url="/store", status_code=303)
+    return RedirectResponse(url="/store/", status_code=303)
