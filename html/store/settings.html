@@ -48,8 +48,7 @@
 {% block content %}
 <div class="card">
     <h2>Настройки магазина</h2>
-    <div style="color: var(--text-secondary); margin-bottom: 12px;">{{ store.name }} · ID: <strong>{{ store.ID
-        }}</strong></div>
+    <div style="color: var(--text-secondary); margin-bottom: 12px;">{{ store.name|safe }} · ID: <strong>{{ store.ID|safe }}</strong></div>
     {% if message %}<p style="color: var(--success); margin-bottom: 10px;">{{ message }}</p>{% endif %}
     {% if error %}<p style="color: var(--danger); margin-bottom: 10px;">{{ error }}</p>{% endif %}
 
@@ -66,12 +65,12 @@
         <div class="fields">
             <div class="field">
                 <label for="name">Название</label>
-                <input id="name" name="name" type="text" value="{{ store.name }}" autocomplete="off" required>
+                <input id="name" name="name" type="text" value="{{ store.name|safe }}" autocomplete="off" required>
             </div>
             <div class="field">
                 <label for="description">Описание</label>
                 <textarea id="description" name="description" autocomplete="off"
-                          required>{{ store.description }}</textarea>
+                          required>{{ store_description_unpacked|safe }}</textarea>
             </div>
         </div>
         <button class="btn btn-success" type="submit">Сохранить</button>

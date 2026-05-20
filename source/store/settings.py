@@ -11,7 +11,7 @@ from LyPayAPI.store.info import get as get_store, get_by_shopkeeper
 from LyPayAPI.store.settings.name import update as update_name
 from LyPayAPI.store.settings.description import update as update_description
 from LyPayAPI.store.settings.avatar import update as update_avatar, get as get_avatar
-from LyPayAPI.utils.format import clear
+from LyPayAPI.utils.format import clear, rollback
 
 router = APIRouter()
 templates = Jinja2Templates(directory="html")
@@ -66,6 +66,7 @@ async def settings_page(
             request,
             extra={
                 "store": store,
+                "store_description_unpacked": rollback(store["description"]),
                 "avatar": avatar_url,
                 "message": message,
                 "error": error,
