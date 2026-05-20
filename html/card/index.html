@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Карта — LyPay{% endblock %}
+{% block content %}
+<div class="balance_local">
+  <p>{{ balance }}</p>
+</div>
+
+<div class="buttons-container">
+  <button id="to-deposit">Пополнить [картинко]</button>
+  <button id="to-transfer">Перевести [картинко]</button>
+</div>
+
+<div class="transaction-history">
+  <p>История транзакций</p>
+  {% for data in transaction_history %}
+  <div>
+    {% if data.type == "in" %}
+      <span>Перевод от пользователю <a href="/profile/{{ data.ID }}">{{ data.ID }}</a></span>
+    {% elif data.type == "out" %}
+      <span>Перевод пользователю <a href="/profile/{{ data.ID }}">{{ data.ID }}</a></span>
+    {% elif data.type == "deposit" %}
+      <span>Зачисление в обменном пункте</span>
+    {% else %}
+      <span>Оплата в магазине <a href="/stores/{{ data.storeID }}">{{ data.storeID }}</a></span>
+    {% for name, multiplier in data.display_items %}
+      <br>
+      <span>{{ name }}</span> x
+      <span>{{ multiplier }}</span>
+      {% endfor %}
+    {% endif %}
+    <span>{% if data.type not in ("cheque", "out") %}+{% else %}-{% endif %}{{ data.amount }} Тгр.</span>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
