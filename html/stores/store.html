@@ -1,0 +1,196 @@
+﻿{% extends "base.html" %}
+{% block title %}{{ store.name }} — LyPay{% endblock %}
+
+{% block head %}
+<style>
+    .store-name {
+        font-weight: 900;
+        font-size: 1.15rem;
+        line-height: 1.2;
+        margin-bottom: 6px;
+    }
+
+    .store-desc {
+        color: var(--text-secondary);
+        font-size: 0.98rem;
+    }
+
+    .items {
+        display: grid;
+        gap: 10px;
+    }
+
+    .item {
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: #fff;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .item-name {
+        font-weight: 900;
+        line-height: 1.2;
+    }
+
+    .item-price {
+        color: var(--text-secondary);
+        white-space: nowrap;
+        font-weight: 700;
+    }
+
+    .qty {
+        display: grid;
+        grid-template-columns: 36px 44px 36px;
+        height: 36px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        background: rgba(15, 23, 42, 0.04);
+    }
+
+    .qty button {
+        border: none;
+        background: transparent;
+        font-size: 18px;
+        color: rgba(15, 23, 42, 0.75);
+    }
+
+    .qty .value {
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        background: rgba(255, 255, 255, 0.7);
+        border-left: 1px solid rgba(15, 23, 42, 0.10);
+        border-right: 1px solid rgba(15, 23, 42, 0.10);
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <img class="avatar-rect" src="{{ avatar }}" alt="Аватар {{ store.name|safe }}">
+    <div>
+        <div class="store-name">{{ store.name|safe }}</div>
+        <div class="store-desc">{{ store.description|safe }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Товары</h2>
+    <div class="items">
+        {% for item in items %}
+        <div class="item" data-item-id="{{ item.itemID }}" data-price="{{ item.price }}">
+            <div>
+                <div class="item-name">{{ item.name|safe }}</div>
+                <div class="item-price">{{ item.price }} Тгр.</div>
+            </div>
+            <div class="qty" aria-label="Количество">
+                <button type="button" class="minus" aria-label="Уменьшить">−</button>
+                <div class="value">0</div>
+                <button type="button" class="plus" aria-label="Увеличить">+</button>
+            </div>
+        </div>
+        {% endfor %}
+        {% if not items %}
+        <div style="color: var(--text-secondary);">Нет активных товаров.</div>
+        {% endif %}
+    </div>
+    <div class="mt-2" style="display:grid; gap:10px;">
+        <button type="submit" class="btn btn-success" id="cartBtn" style="gap: 8px">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 6h15l-2 9H7L6 6Z"></path>
+                <path d="M6 6 5 3H2"></path>
+                <path d="M8 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"></path>
+                <path d="M18 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"></path>
+            </svg>
+            Купить
+            <span class="cart-sum" id="cartSum">0 Тгр.</span>
+        </button>
+        <a class="btn btn-primary" style="text-decoration:0" href="/stores">К списку магазинов</a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const storeId = "{{ store.ID }}";
+    const cartKey = `stores_cart:${storeId}`;
+
+    function loadCart() {
+        try {
+            return JSON.parse(localStorage.getItem(cartKey) || "{}");
+        } catch {
+            return {};
+        }
+    }
+
+    function saveCart(cart) {
+        localStorage.setItem(cartKey, JSON.stringify(cart));
+    }
+
+    function calcTotal(cart) {
+        let total = 0;
+        for (const el of document.querySelectorAll(".item[data-item-id]")) {
+            const id = el.dataset.itemId;
+            const price = parseInt(el.dataset.price || "0", 10) || 0;
+            const qty = parseInt(cart[id] || 0, 10) || 0;
+            total += price * qty;
+        }
+        return total;
+    }
+
+    function render(cart) {
+        for (const el of document.querySelectorAll(".item[data-item-id]")) {
+            const id = el.dataset.itemId;
+            const qty = parseInt(cart[id] || 0, 10) || 0;
+            const value = el.querySelector(".qty .value");
+            if (value) value.textContent = String(qty);
+        }
+        const total = calcTotal(cart);
+        const btn = document.getElementById("cartBtn");
+        const sum = document.getElementById("cartSum");
+        if (sum) sum.textContent = `${total} Тгр.`;
+        if (btn) btn.disabled = total <= 0;
+    }
+
+    let cart = loadCart();
+    render(cart);
+
+    document.querySelectorAll(".item[data-item-id]").forEach((el) => {
+        const id = el.dataset.itemId;
+        const minus = el.querySelector(".minus");
+        const plus = el.querySelector(".plus");
+        minus?.addEventListener("click", () => {
+            const next = Math.max(0, (parseInt(cart[id] || 0, 10) || 0) - 1);
+            if (next === 0) delete cart[id]; else cart[id] = next;
+            saveCart(cart);
+            render(cart);
+        });
+        plus?.addEventListener("click", () => {
+            const next = Math.min(999, (parseInt(cart[id] || 0, 10) || 0) + 1);
+            cart[id] = next;
+            saveCart(cart);
+            render(cart);
+        });
+    });
+
+    document.getElementById("cartBtn")?.addEventListener("click", async () => {
+        const total = calcTotal(cart);
+        if (total <= 0) return;
+        const resp = await fetch(`/stores/${storeId}/cart`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({items: cart}),
+        });
+        if (!resp.ok) return;
+        window.location.href = `/stores/${storeId}/checkout`;
+    });
+</script>
+{% endblock %}

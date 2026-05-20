@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Магазины — LyPay{% endblock %}
+
+{% block head %}
+<style>
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .store-card {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: #fff;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        transition: transform 0.05s ease, filter 0.15s ease;
+    }
+    .store-card:active { transform: translateY(1px); }
+
+    .store-body {
+        padding: 12px 12px 0;
+        display: grid;
+        gap: 6px;
+    }
+
+    .store-id {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin-top: -2px;
+    }
+
+    .store-name {
+        font-weight: 900;
+        line-height: 1.2;
+        font-size: 1.0rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .store-desc {
+        color: var(--text-secondary);
+        font-size: 0.92rem;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Список магазинов</h2>
+    <div class="grid">
+        {% for s in stores %}
+        <a class="store-card" href="/stores/{{ s.ID }}">
+            <img class="avatar-rect" src="{{ s.avatar }}" alt="Аватар {{ s.name|safe }}">
+            <div class="store-body">
+                <div class="store-name">{{ s.name|safe }}</div>
+                <div class="store-id">ID: {{ s.ID }}</div>
+                <div class="store-desc">{{ s.description|safe }}</div>
+            </div>
+        </a>
+        {% endfor %}
+        {% if not stores %}
+        <div style="color: var(--text-secondary);">Пока нет магазинов.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

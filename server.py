@@ -12,6 +12,7 @@ from source.test import router as test_router
 from source.auth import router as auth_router
 #from source.mst import router as mst_router
 from source.store import router as store_router
+from source.stores import router as stores_router
 from source.profile import router as profile_router
 from source.media import router as media_router
 from source.fps import router as fps_router
@@ -46,6 +47,7 @@ app.include_router(auth_router)
 app.include_router(profile_router)
 app.include_router(media_router)
 app.include_router(store_router, prefix="/store")
+app.include_router(stores_router)
 #app.include_router(mst_router, prefix='/mst')
 app.include_router(fps_router)
 app.include_router(card_router)
