@@ -43,10 +43,7 @@ async def check_store_code(request: Request, code: str = Form(...)):
         return RedirectResponse(url="/login?redirect=store", status_code=303)
 
     try:
-        ID = user_info["ID"]
-        user = await get(ID)
-        email = user["email"]
-        is_valid = await check_link(email, code)
+        link_email = await check_link(code)
     except Exception as e:
         if is_bad_firewall_error(e):
             return RedirectResponse(url="/bad-firewall-status", status_code=303)
@@ -56,7 +53,7 @@ async def check_store_code(request: Request, code: str = Form(...)):
             status_code=400,
         )
 
-    if not is_valid:
+    if not link_email:
         return templates.TemplateResponse(
             "store/register.html",
             await build_base_context(

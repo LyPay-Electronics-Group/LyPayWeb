@@ -20,7 +20,11 @@ async def serve_store_avatar(filename: str, request: Request):
     if not file_path.is_file():
         raise HTTPException(status_code=404, detail="Файл не найден")
 
-    return FileResponse(file_path, media_type="image/jpeg")
+    return FileResponse(file_path, media_type="image/jpeg", headers={
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+    })
 
 
 @router.get("/media/users_media/{filename}")
@@ -33,4 +37,8 @@ async def serve_avatar(filename: str, request: Request):
     if not file_path.is_file():
         raise HTTPException(status_code=404, detail="Файл не найден")
 
-    return FileResponse(file_path, media_type="image/jpeg")
+    return FileResponse(file_path, media_type="image/jpeg", headers={
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+    })
