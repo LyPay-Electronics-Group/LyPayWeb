@@ -22,16 +22,13 @@ AVATAR_DIR.mkdir(parents=True, exist_ok=True)
 AVATAR_MAX_SIZE = 5 * 1024 * 1024
 
 
-async def _require_host_store(request: Request) -> tuple[dict, str, dict]:
+async def _require_shopkeeper_store(request: Request) -> tuple[dict, str, dict]:
     user_info = request.session.get("user")
     if not user_info:
         raise HTTPException(status_code=401, detail="auth required")
 
     store_id = await get_by_shopkeeper(user_info["ID"])
     store = await get_store(store_id)
-    if store.get("hostID") != user_info["ID"]:
-        raise HTTPException(status_code=403, detail="host required")
-
     return user_info, store_id, store
 
 
@@ -44,10 +41,10 @@ async def settings_page(
         return RedirectResponse("/", status_code=303)
 
     try:
-        _, store_id, store = await _require_host_store(request)
+        _, store_id, store = await _require_shopkeeper_store(request)
     except HTTPException as e:
         if e.status_code in (401, 403):
-            return RedirectResponse("/store", status_code=303)
+            return RedirectResponse("/store/", status_code=303)
         raise
 
     try:
@@ -88,10 +85,10 @@ async def save_settings(
         return RedirectResponse("/", status_code=303)
 
     try:
-        _, store_id, _ = await _require_host_store(request)
+        _, store_id, _ = await _require_shopkeeper_store(request)
     except HTTPException as e:
         if e.status_code in (401, 403):
-            return RedirectResponse("/store", status_code=303)
+            return RedirectResponse("/store/", status_code=303)
         raise
 
     try:
@@ -119,10 +116,10 @@ async def upload_store_avatar(
         return RedirectResponse("/", status_code=303)
 
     try:
-        _, store_id, _ = await _require_host_store(request)
+        _, store_id, _ = await _require_shopkeeper_store(request)
     except HTTPException as e:
         if e.status_code in (401, 403):
-            return RedirectResponse("/store", status_code=303)
+            return RedirectResponse("/store/", status_code=303)
         raise
 
     if not file.content_type or not file.content_type.startswith("image/"):

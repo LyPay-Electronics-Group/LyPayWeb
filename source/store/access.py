@@ -28,7 +28,7 @@ async def access_page(
 
     current_storeID = await get_by_shopkeeper(user_info["ID"])
     if (await get(current_storeID))["hostID"] != user_info["ID"]:
-        return RedirectResponse("/store", status_code=303)
+        return RedirectResponse("/store/", status_code=303)
 
     return templates.TemplateResponse(
         "store/access.html",
@@ -57,7 +57,7 @@ async def remove(
 
     current_storeID = await get_by_shopkeeper(user_info["ID"])
     if (await get(current_storeID))["hostID"] != user_info["ID"]:
-        return RedirectResponse("/store", status_code=303)
+        return RedirectResponse("/store/", status_code=303)
 
     if ID == user_info["ID"]:
         return JSONResponse({"error": True}, status_code=403)
@@ -84,7 +84,7 @@ async def add(
 
     current_storeID = await get_by_shopkeeper(user_info["ID"])
     if (await get(current_storeID))["hostID"] != user_info["ID"]:
-        return RedirectResponse("/store", status_code=303)
+        return RedirectResponse("/store/", status_code=303)
 
     if ID == user_info["ID"]:
         return JSONResponse({"error": True}, status_code=403)
