@@ -48,7 +48,7 @@
 {% block content %}
 <div class="card">
     <h2>Настройки магазина</h2>
-    <div style="color: var(--text-secondary); margin-bottom: 12px;">{{ store.name|safe }} · ID: <strong>{{ store.ID|safe }}</strong></div>
+    <div style="color: var(--text-secondary); margin-bottom: 12px;">{{ store.name|safe }} · ID: <strong>{{ store.ID }}</strong></div>
     {% if message %}<p style="color: var(--success); margin-bottom: 10px;">{{ message }}</p>{% endif %}
     {% if error %}<p style="color: var(--danger); margin-bottom: 10px;">{{ error }}</p>{% endif %}
 
