@@ -48,7 +48,7 @@ async def index(
             displaying_items.append((item_data['name'], multiplier))
         user_cheques.append((
             dict(zip(
-                ("type",   "storeID",  "display_items",           "amount"),
+                ("type",   "storeID",  "display_items",   "amount"),
                 ("cheque",  cheque[0],  displaying_items,  total_sum)
             )),
             cheque[2]
