@@ -68,6 +68,10 @@
         border-right: 1px solid rgba(15, 23, 42, 0.10);
     }
 
+    .muted {
+        color: var(--text-secondary);
+    }
+
 </style>
 {% endblock %}
 
@@ -76,6 +80,7 @@
     <img class="avatar-rect" src="{{ avatar }}" alt="Аватар {{ store.name|safe }}">
     <div>
         <div class="store-name">{{ store.name|safe }}</div>
+        <div class="muted">ID: <strong>{{ store.ID }}</strong></div>
         <div class="store-desc">{{ store.description|safe }}</div>
     </div>
 </div>
@@ -121,19 +126,6 @@
 {% block scripts %}
 <script>
     const storeId = "{{ store.ID }}";
-    const cartKey = `stores_cart:${storeId}`;
-
-    function loadCart() {
-        try {
-            return JSON.parse(localStorage.getItem(cartKey) || "{}");
-        } catch {
-            return {};
-        }
-    }
-
-    function saveCart(cart) {
-        localStorage.setItem(cartKey, JSON.stringify(cart));
-    }
 
     function calcTotal(cart) {
         let total = 0;
@@ -160,7 +152,7 @@
         if (btn) btn.disabled = total <= 0;
     }
 
-    let cart = loadCart();
+    const cart = {};
     render(cart);
 
     document.querySelectorAll(".item[data-item-id]").forEach((el) => {
@@ -170,13 +162,11 @@
         minus?.addEventListener("click", () => {
             const next = Math.max(0, (parseInt(cart[id] || 0, 10) || 0) - 1);
             if (next === 0) delete cart[id]; else cart[id] = next;
-            saveCart(cart);
             render(cart);
         });
         plus?.addEventListener("click", () => {
             const next = Math.min(999, (parseInt(cart[id] || 0, 10) || 0) + 1);
             cart[id] = next;
-            saveCart(cart);
             render(cart);
         });
     });

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Оплата — {{ store.name }}{% endblock %}
+
+{% block head %}
+<style>
+    .title {
+        font-size: 1.25rem;
+        font-weight: 900;
+        line-height: 1.15;
+        margin-bottom: 10px;
+    }
+
+    .muted {
+        color: var(--text-secondary);
+    }
+
+    .lines {
+        display: grid;
+        gap: 10px;
+    }
+
+    .line {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .line-name {
+        font-weight: 800;
+    }
+
+    .line-meta {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .line-total {
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .sum {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        align-items: baseline;
+        margin-top: 10px;
+        font-size: 1.15rem;
+        font-weight: 900;
+    }
+
+    .pay-wrap {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .err {
+        color: var(--danger);
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <img class="avatar-rect" src="{{ avatar }}" alt="Аватар {{ store.name|safe }}">
+    <div>
+        <div class="title">{{ store.name|safe }}</div>
+        <div class="muted">ID: <strong>{{ store.ID }}</strong></div>
+    </div>
+    {% if error %}
+    <p style="color: var(--danger); margin-top: 10px;">{{ error }}</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="lines">
+        {% for l in lines %}
+        <div class="line">
+            <div>
+                <div class="line-name">{{ l.name|safe }}</div>
+                <div class="line-meta">{{ l.qty }} × {{ l.price }} Тгр.</div>
+            </div>
+            <div class="line-total">{{ l.line_total }} Тгр.</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="sum">
+        <div class="muted">Итого:</div>
+        <div>{{ total }} Тгр.</div>
+    </div>
+</div>
+
+<div class="card">
+    {% if insufficient %}
+    <div class="err" style="margin-bottom: 10px;">У вас недостаточно тугриков на балансе</div>
+    {% else %}
+    <div class="muted" style="margin-bottom: 10px;">Баланс после: <strong>{{ balance_after }}</strong></div>
+    {% endif %}
+    <form class="pay-wrap" action="/stores/{{ store.ID }}/pay" method="post">
+        <button class="btn btn-success" type="submit" {% if insufficient %}disabled{% endif %}>Оплатить</button>
+        <a class="btn btn-primary" style="text-decoration:0" href="/stores/{{ store.ID }}">Назад</a>
+    </form>
+</div>
+{% endblock %}
+
