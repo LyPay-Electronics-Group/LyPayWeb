@@ -3,7 +3,6 @@
 
 {% block head %}
 <style>
-    // это украдено из store/items.html
     .item-card {
         display: grid;
         gap: 10px;
@@ -69,7 +68,8 @@
 <div class="card">
     <h2>Чеки</h2>
     {% if error %}<p style="color: var(--danger); margin-bottom: 10px;">{{ error }}</p>{% endif %}
-    <div style="color: var(--text-secondary); margin-bottom: 12px;">{{ store.name|safe }} · ID: <strong>{{ store.ID }}</strong></div>
+    <div style="color: var(--text-secondary); margin-bottom: 12px;">{{ store.name|safe }} · ID: <strong>{{ store.ID
+        }}</strong></div>
 
     <div id="container" style="display:grid; gap:12px;">
         {% for cheque in cheques %}
@@ -104,19 +104,30 @@
 
 {% block scripts %}
 <script>
-{% for cheque in cheques %}
-const btn_{{ cheque.chequeID }} = document.getElementById('{{ cheque.chequeID }}');
-btn_{{ cheque.chequeID }}.addEventListener('click', async () => {
-    const response = await fetch(`/store/cheques/cancel?ID={{ cheque.chequeID }}`, {
-        method: 'GET',
-        headers: {'Content-Type': 'application/json'}
+    const container = document.getElementById('container');
+
+    container.addEventListener('click', async (event) => {
+        const button = event.target.closest('button');
+        if (!button || !button.id) return;
+        if (!button.closest('.cheque-card')) return;
+        if (button.disabled) return;
+        const chequeID = button.id;
+        button.disabled = true;
+
+        try {
+            const response = await fetch(
+                `/store/cheques/cancel?ID=${encodeURIComponent(chequeID)}`,
+                {method: 'GET'}
+            );
+            if (!response.ok) {
+                throw new Error(`Ошибка сервера: ${response.status}`);
+            }
+            button.textContent = 'Чек отменен';
+        } catch (error) {
+            console.error(error)
+        }
+
     });
-    if (response.status >= 400) {
-        btn_{{ cheque.chequeID }}.disabled = true;
-        btn_{{ cheque.chequeID }}.textContent = "Произошла ошибка при попытке отмены";
-    }
-    else btn_{{ cheque.chequeID }}.textContent = "Чек отменён";
-}
-{% endfor%}
+
 </script>
 {% endblock %}
