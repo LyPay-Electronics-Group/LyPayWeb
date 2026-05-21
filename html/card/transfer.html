@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Перевод — LyPay{% endblock %}
+
+{% block head %}
+<style>
+    .form {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+
+    .field input {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-size: 1rem;
+    }
+
+    .note {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.35;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Перевод</h2>
+    <div class="note">Переводи только по правильному ID. Отменить перевод нельзя.</div>
+
+    {% if ok %}
+    <p style="color: var(--success); margin-top: 10px;">{{ ok }}</p>
+    {% endif %}
+    {% if err %}
+    <p style="color: var(--danger); margin-top: 10px;">{{ err }}</p>
+    {% endif %}
+
+    <form class="form" method="post" action="/card/transfer">
+        <div class="field">
+            <label for="id_in">ID получателя</label>
+            <input id="id_in" name="id_in" inputmode="numeric" autocomplete="off" required>
+        </div>
+        <div class="field">
+            <label for="amount">Сумма, Тгр.</label>
+            <input id="amount" name="amount" inputmode="numeric" autocomplete="off" required>
+        </div>
+        <button class="btn btn-primary" type="submit">Перевести</button>
+    </form>
+</div>
+{% endblock %}
+

@@ -1,7 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Пополнение — LyPay{% endblock %}
-{% block content %}
-<div>
 
+{% block content %}
+<div class="card">
+    <h2>Пополнение баланса</h2>
+    <div>
+        <img src="{{qr}}" style="width: 67%; margin: 0 auto; display: block">
+        <p style="font-size: 1.1rem; line-height: 1.7; margin: 20px 0;">
+            Пожертвуйте деньги в пользу благотворительного фонда “Кислород” либо при помощи наличных на одном из
+            обменных пунктов, либо по <a href="https://bf-kislorod.ru/kak-pomoch/">ссылке</a>
+        </p>
+
+        <p style="font-size: 1.1rem; line-height: 1.7; margin: 20px 0;">
+            После, продемонстрируйте данный qr-код организатору на одном из обменных пунктов. С помощью кода организатор
+            сможет зачислить электронные тугрики на ваш счет </p>
+    </div>
 </div>
 {% endblock %}
