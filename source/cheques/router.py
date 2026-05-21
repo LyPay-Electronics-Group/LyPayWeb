@@ -21,7 +21,7 @@ async def confirm_page(
         firewall_ok=D(FVF("stores")),
 ):
     if not firewall_ok:
-        return RedirectResponse("/", status_code=303)
+        return RedirectResponse(url="/bad-firewall-status", status_code=303)
 
     user_info = request.session.get("user", None)
     if user_info is None:
