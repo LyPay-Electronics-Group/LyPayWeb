@@ -60,10 +60,15 @@
 
 {% block content %}
 <div class="card">
+    <form method="get" action="/stores" style="display:flex; gap:10px; margin-bottom: 12px;">
+        <input type="text" name="q" value="{{ q|default('') }}" placeholder="Поиск по названию или ID"
+               autocomplete="off"
+               style="flex:1; padding:0.6rem; border:1px solid var(--border); border-radius:10px;">
+    </form>
     <h2>Список магазинов</h2>
     <div class="grid">
         {% for s in stores %}
-        <a class="store-card" href="/stores/{{ s.ID }}">
+        <a class="store-card" href="/stores/{{ s.ID }}" data-store-id="{{ s.ID }}" data-store-name="{{ s.name|lower }}">
             <img class="avatar-rect" src="{{ s.avatar }}" alt="Аватар {{ s.name|safe }}">
             <div class="store-body">
                 <div class="store-name">{{ s.name|safe }}</div>
@@ -77,4 +82,27 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        const input = document.querySelector('input[name="q"]');
+        const cards = Array.from(document.querySelectorAll('.store-card'));
+        if (!input || cards.length === 0) return;
+
+        function applyFilter() {
+            const q = (input.value || '').trim().toLowerCase();
+            for (const card of cards) {
+                const id = (card.getAttribute('data-store-id') || '').toLowerCase();
+                const name = (card.getAttribute('data-store-name') || '').toLowerCase();
+                const ok = !q || id.includes(q) || name.includes(q);
+                card.style.display = ok ? '' : 'none';
+            }
+        }
+
+        input.addEventListener('input', applyFilter);
+        applyFilter();
+    })();
+</script>
 {% endblock %}

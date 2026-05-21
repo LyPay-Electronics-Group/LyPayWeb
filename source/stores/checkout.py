@@ -63,8 +63,11 @@ async def checkout_page(
     cart = request.session.get(f"stores_cart:{ID}", {})
     if not cart:
         return RedirectResponse(f"/stores/{ID}", status_code=303)
+    try:
+        store = await get_store(ID)
+    except Exception:
+        return RedirectResponse(url="/stores", status_code=303)
 
-    store = await get_store(ID)
     avatar_url = "/static/skill_issue.jpg"
     if store.get("avatar"):
         try:

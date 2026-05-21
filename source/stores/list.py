@@ -14,8 +14,8 @@ templates = Jinja2Templates(directory="html")
 
 @router.get("/stores", response_class=HTMLResponse)
 async def stores_index(
-    request: Request,
-    firewall_ok=D(FVF("stores")),
+        request: Request,
+        firewall_ok=D(FVF("stores")),
 ):
     if not firewall_ok:
         return RedirectResponse(url="/bad-firewall-status", status_code=303)
@@ -57,4 +57,3 @@ async def stores_index(
             extra={"stores": stores},
         ),
     )
-

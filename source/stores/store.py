@@ -25,8 +25,10 @@ async def store_page(
     user = request.session.get("user")
     if not user:
         return RedirectResponse("/login", status_code=303)
-
-    store = await get_store(ID)
+    try:
+        store = await get_store(ID)
+    except Exception:
+        return RedirectResponse("/stores", status_code=303)
 
     avatar_url = "/static/skill_issue.jpg"
     if store.get("avatar"):
