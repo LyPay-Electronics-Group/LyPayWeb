@@ -65,6 +65,7 @@ async def index(
         "card/index.html",
         await build_base_context(
             request,
+            active_tab="card",
             extra={
                 "transaction_history": transaction_history
             },
