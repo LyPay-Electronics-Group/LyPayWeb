@@ -10,13 +10,14 @@ from dotenv import load_dotenv
 
 from source.test import router as test_router
 from source.auth import router as auth_router
-#from source.mst import router as mst_router
+# from source.mst import router as mst_router
 from source.store import router as store_router
 from source.stores import router as stores_router
 from source.profile import router as profile_router
 from source.media import router as media_router
 from source.fps import router as fps_router
 from source.card import router as card_router
+from source.cheques import router as cheques_router
 
 # from source.plug import router as plug_router
 
@@ -48,9 +49,10 @@ app.include_router(profile_router)
 app.include_router(media_router)
 app.include_router(store_router, prefix="/store")
 app.include_router(stores_router)
-#app.include_router(mst_router, prefix='/mst')
+# app.include_router(mst_router, prefix='/mst')
 app.include_router(fps_router)
 app.include_router(card_router)
+app.include_router(cheques_router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

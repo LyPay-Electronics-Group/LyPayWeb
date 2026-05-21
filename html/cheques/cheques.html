@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Покупка подтверждена — LyPay{% endblock %}
+
+{% block head %}
+<style>
+    .title {
+        font-weight: 900;
+        font-size: 1.15rem;
+        line-height: 1.15;
+        margin-bottom: 6px;
+    }
+
+    .muted {
+        color: var(--text-secondary);
+    }
+
+    .lines {
+        display: grid;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .line {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .line-name {
+        font-weight: 800;
+    }
+
+    .line-meta {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .line-total {
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .sum {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        align-items: baseline;
+        margin-top: 10px;
+        font-size: 1.15rem;
+        font-weight: 900;
+    }
+
+    .ok {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 900;
+        color: var(--success);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="ok">Покупка подтверждена</div>
+    <div class="muted" style="margin-top: 6px;">Чек: <strong>{{ cheque.chequeID }}</strong></div>
+</div>
+
+<div class="card">
+    <img class="avatar-rect" src="{{ avatar }}" alt="Аватар {{ store.name|safe }}">
+    <div>
+        <div class="title">{{ store.name|safe }}</div>
+        <div class="muted">ID: <strong>{{ store.ID }}</strong></div>
+    </div>
+    {% if error %}
+    <p style="color: var(--danger); margin-top: 10px;">{{ error }}</p>
+    {% endif %}
+
+    <div class="lines">
+        {% for l in lines %}
+        <div class="line">
+            <div>
+                <div class="line-name">{{ l.name }}</div>
+                <div class="line-meta">{{ l.qty }} × {{ l.price }} Тгр.</div>
+            </div>
+            <div class="line-total">{{ l.line_total }} Тгр.</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="sum">
+        <div class="muted">Итого:</div>
+        <div>{{ total }} Тгр.</div>
+    </div>
+
+    <div class="mt-2" style="display:grid; gap:10px;">
+        <a class="btn btn-primary" style="text-decoration:0" href="/stores/{{ store.ID }}">Вернуться в магазин</a>
+        <a class="btn btn-primary" style="text-decoration:0" href="/stores">К списку магазинов</a>
+    </div>
+</div>
+{% endblock %}
+
