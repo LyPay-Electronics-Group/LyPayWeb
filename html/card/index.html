@@ -1,35 +1,273 @@
 {% extends "base.html" %}
 {% block title %}Карта — LyPay{% endblock %}
+
+{% block head %}
+<style>
+    .card-balance {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(141, 231, 189, 0.18));
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 22px;
+        padding: 16px;
+        display: grid;
+        gap: 10px;
+    }
+
+    .balance-title {
+        color: var(--text-secondary);
+        font-size: 0.92rem;
+    }
+
+    .balance-value {
+        font-weight: 900;
+        font-size: 1.65rem;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
+    }
+
+    .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .action-btn {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 12px;
+        border-radius: 18px;
+        text-decoration: none;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: inherit;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        transition: transform 0.05s ease;
+    }
+
+    .action-btn:active {
+        transform: translateY(1px);
+    }
+
+    .action-ico {
+        width: 44px;
+        height: 44px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+    }
+
+    .action-title {
+        font-weight: 900;
+        line-height: 1.15;
+    }
+
+    .history {
+        display: grid;
+        gap: 10px;
+    }
+
+    .history-item {
+        display: grid;
+        grid-template-columns: 44px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 12px 12px;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        background: #fff;
+    }
+
+    .h-ico {
+        width: 44px;
+        height: 44px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(15, 23, 42, 0.10);
+        background: rgba(15, 23, 42, 0.03);
+        color: rgba(15, 23, 42, 0.85);
+    }
+
+    .h-ico svg {
+        width: 22px;
+        height: 22px;
+        stroke: currentColor;
+    }
+
+    .h-ico.in {
+        background: rgba(34, 197, 94, 0.10);
+        border-color: rgba(34, 197, 94, 0.25);
+        color: rgba(22, 163, 74, 0.95);
+    }
+
+    .h-ico.out {
+        background: rgba(239, 68, 68, 0.10);
+        border-color: rgba(239, 68, 68, 0.25);
+        color: rgba(220, 38, 38, 0.95);
+    }
+
+    .h-ico.deposit {
+        background: rgba(59, 130, 246, 0.10);
+        border-color: rgba(59, 130, 246, 0.25);
+        color: rgba(37, 99, 235, 0.95);
+    }
+
+    .h-ico.purchase {
+        background: rgba(168, 85, 247, 0.10);
+        border-color: rgba(168, 85, 247, 0.25);
+        color: rgba(147, 51, 234, 0.95);
+    }
+
+    .h-title {
+        font-weight: 900;
+        line-height: 1.15;
+    }
+
+    .h-sub {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        line-height: 1.15;
+        margin-top: 2px;
+    }
+
+    .amount {
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    .amount.in {
+        color: var(--success);
+    }
+
+    .amount.out {
+        color: var(--danger);
+    }
+
+    .mini-items {
+        margin-top: 6px;
+        display: grid;
+        gap: 2px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .mini-items span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="balance_local">
-  <p>{{ balance }}</p>
+<div class="card card-balance">
+    <div class="balance-title">Баланс</div>
+    <div class="balance-value">{{ balance|default("—") }}</div>
+
+    <div class="actions">
+        <a class="action-btn" href="/card/deposit" aria-label="Пополнить">
+            <div class="action-ico" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14"></path>
+                    <path d="M5 12h14"></path>
+                </svg>
+            </div>
+            <div>
+                <div class="action-title">Пополнить</div>
+            </div>
+        </a>
+
+        <a class="action-btn" href="/card/transfer" aria-label="Перевести">
+            <div class="action-ico" aria-hidden="true">
+                <svg width="22" height="22" class="button-icon" viewBox="0 0 24 24" fill="none" stroke="black"
+                     stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="19" x2="12" y2="5"/>
+                    <polyline points="5 12 12 5 19 12"/>
+                </svg>
+            </div>
+            <div>
+                <div class="action-title">Перевести</div>
+            </div>
+        </a>
+    </div>
 </div>
 
-<div class="buttons-container">
-  <a id="to-deposit" href="/card/deposit">Пополнить [картинко]</a>
-  <a id="to-transfer" href="/card/transfer">Перевести [картинко]</a>
-</div>
+<div class="card">
+    <h2 style="margin-bottom: 10px;">История операций</h2>
+    <div class="history">
+        {% for data in transaction_history %}
+        <div class="history-item">
+            {% set icon_class = "purchase" %}
+            {% if data.type == "in" %}
+                {% set icon_class = "in" %}
+            {% elif data.type == "out" %}
+                {% set icon_class = "out" %}
+            {% elif data.type == "deposit" %}
+                {% set icon_class = "deposit" %}
+            {% elif data.type in ("cheque", "purchase", "shop") %}
+                {% set icon_class = "purchase" %}
+            {% endif %}
 
-<div class="transaction-history">
-  <p>История транзакций</p>
-  {% for data in transaction_history %}
-  <div>
-    {% if data.type == "in" %}
-      <span>Перевод от пользователю <a href="/profile/{{ data.ID }}">{{ data.ID }}</a></span>
-    {% elif data.type == "out" %}
-      <span>Перевод пользователю <a href="/profile/{{ data.ID }}">{{ data.ID }}</a></span>
-    {% elif data.type == "deposit" %}
-      <span>Зачисление в обменном пункте</span>
-    {% else %}
-      <span>Оплата в магазине <a href="/stores/{{ data.storeID }}">{{ data.storeID }}</a></span>
-    {% for name, multiplier in data.display_items %}
-      <br>
-      <span>{{ name }}</span> x
-      <span>{{ multiplier }}</span>
-      {% endfor %}
-    {% endif %}
-    <span>{% if data.type not in ("cheque", "out") %}+{% else %}-{% endif %}{{ data.amount }} Тгр.</span>
-  </div>
-  {% endfor %}
+            <div class="h-ico {{ icon_class }}" aria-hidden="true">
+                {% if data.type == "in" %}
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <polyline points="5 12 12 19 19 12"></polyline>
+                </svg>
+                {% elif data.type == "out" %}
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+                {% elif data.type == "deposit" %}
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14"></path>
+                    <path d="M5 12h14"></path>
+                </svg>
+                {% else %}
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 7h14l-1.5 12H7.5L6 7Z"></path>
+                    <path d="M9 7a3 3 0 0 1 6 0"></path>
+                </svg>
+                {% endif %}
+            </div>
+
+            <div>
+                {% if data.type == "in" %}
+                <div class="h-title">Перевод от <a href="/profile/{{ data.ID }}">{{ data.ID }}</a></div>
+                <div class="h-sub">Входящий перевод</div>
+                {% elif data.type == "out" %}
+                <div class="h-title">Перевод пользователю <a href="/profile/{{ data.ID }}">{{ data.ID }}</a></div>
+                <div class="h-sub">Исходящий перевод</div>
+                {% elif data.type == "deposit" %}
+                <div class="h-title">Зачисление</div>
+                <div class="h-sub">Обменный пункт</div>
+                {% else %}
+                <div class="h-title">Покупка в магазине <a href="/stores/{{ data.storeID }}">{{ data.storeID }}</a>
+                </div>
+                <div class="mini-items">
+                    {% for name, multiplier in data.display_items %}
+                    <span>{{ name }} × {{ multiplier }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            {% set is_out = data.type in ("cheque", "out") %}
+            <div class="amount {% if is_out %}out{% else %}in{% endif %}">
+                {% if is_out %}-{% else %}+{% endif %}{{ data.amount }} Тгр.
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if not transaction_history %}
+        <div style="color: var(--text-secondary);">Пока нет операций.</div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
