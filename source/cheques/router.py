@@ -26,8 +26,10 @@ async def confirm_page(
     user_info = request.session.get("user", None)
     if user_info is None:
         return RedirectResponse(url="/login", status_code=303)
-
-    cheque = await get_cheque(chequeID)
+    try:
+        cheque = await get_cheque(chequeID)
+    except Exception as e:
+        return RedirectResponse(url="/cheques", status_code=303)  # todo: fix
     store = await get_store(cheque["storeID"])
 
     avatar_url = "/static/skill_issue.jpg"
@@ -60,7 +62,6 @@ async def confirm_page(
         "cheques/cheques.html",
         await build_base_context(
             request,
-            active_tab="stores",
             extra={
                 "store": store,
                 "avatar": avatar_url,
