@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Чеки магазина {{ store.ID }} — LyPay{% endblock %}
+
+{% block head %}
+<style>
+    // это украдено из store/items.html
+    .item-card {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: #fff;
+    }
+
+    .fields {
+        display: grid;
+        gap: 10px;
+    }
+
+    .field label {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+    }
+
+    .field input {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+    }
+
+    .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .mini-btn {
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 700;
+    }
+
+    .mini-btn-primary {
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--primary);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+    }
+
+    .mini-btn-success {
+        background: rgba(34, 197, 94, 0.12);
+        color: var(--success);
+        border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+
+    .mini-btn-danger {
+        background: rgba(220, 38, 38, 0.10);
+        color: var(--danger);
+        border: 1px solid rgba(220, 38, 38, 0.22);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Чеки</h2>
+    {% if error %}<p style="color: var(--danger); margin-bottom: 10px;">{{ error }}</p>{% endif %}
+    <div style="color: var(--text-secondary); margin-bottom: 12px;">{{ store.name|safe }} · ID: <strong>{{ store.ID }}</strong></div>
+
+    <div id="container" style="display:grid; gap:12px;">
+        {% for cheque in cheques %}
+        <div class="cheque-card" id="{{ cheque.chequeID }}-div">
+            <p>{{ cheque.chequeID }}</p>
+            {% for item in cheque.items_parsed %}
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <div style="font-weight: 800;">{{ item.name }}</div>
+                <div style="color: var(--text-secondary); white-space: nowrap;">
+                    <span id="{{ item.itemID }}-price-view">{{ item.price }}</span> Тгр.
+                    x
+                    <span id="{{ item.multiplier }}-price-view">{{ item.multiplier }}</span>
+                </div>
+            </div>
+            {% endfor %}
+            <p>total {{ cheque.total }}</p>
+            <p>timestamp {{ cheque.timestamp }}</p>
+            {% if cheque.active %}
+            <div class="actions">
+                <button id="{{ cheque.chequeID }}">Отменить этот чек</button>
+            </div>
+            {% else %}
+            <div class="actions">
+                <button id="{{ cheque.chequeID }}" disabled>Чек уже отменён</button>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+{% for cheque in cheques %}
+const btn_{{ cheque.chequeID }} = document.getElementById('{{ cheque.chequeID }}');
+btn_{{ cheque.chequeID }}.addEventListener('click', async () => {
+    const response = await fetch(`/store/cheques/cancel?ID={{ cheque.chequeID }}`, {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'}
+    });
+    if (response.status >= 400) {
+        btn_{{ cheque.chequeID }}.disabled = true;
+        btn_{{ cheque.chequeID }}.textContent = "Произошла ошибка при попытке отмены";
+    }
+    else btn_{{ cheque.chequeID }}.textContent = "Чек отменён";
+}
+{% endfor%}
+</script>
+{% endblock %}
